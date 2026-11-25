@@ -1,0 +1,58 @@
+NEUROLAB ENTERPRISE - Sistema web de redes neuronales (Semana 11, PIAD-427)
+=========================================================================
+
+CÓMO ABRIRLO
+1. Descomprime la carpeta.
+2. Haz doble clic en index.html (Chrome, Edge o Firefox actualizados).
+3. Se necesita internet la primera vez: TensorFlow.js 4.22.0 (jsDelivr) y
+   Three.js r128 (cdnjs) se cargan desde la red. Sin ellos el sistema abre,
+   pero no entrena ni dibuja el 3D.
+   Si prefieres un servidor local: en VS Code, clic derecho en index.html >
+   "Open with Live Server", o en la carpeta: python -m http.server 8000
+
+INGRESO
+- Usuario: joaquinoh20
+- Contraseña: la que definiste (animacion123). No está escrita en ningún
+  archivo: users.csv guarda solo un hash PBKDF2-SHA256 con sal.
+- Se bloquea 60 s tras 5 intentos fallidos. Puedes cambiarla en
+  Configuración > Mi cuenta.
+- Luis Ramos y Marta Díaz existen sin contraseña: asígnales una en
+  Administración > Usuarios y roles (o crea usuarios nuevos allí).
+
+IMPORTAR LOS CSV (después de ingresar)
+- Menú lateral > Configuración > Importar CSV > elige los archivos de
+  datos_csv/ (puedes seleccionar varios a la vez) > "Cargar tablas".
+- Se valida el encabezado de cada tabla y la integridad entre ellas. El
+  users.csv debe traer al menos un administrador activo con contraseña.
+- Los CSV de versiones anteriores del sistema no sirven: users.csv ahora
+  tiene las columnas username, password_hash y salt.
+- Los datasets de datasets_ejemplo/ se suben desde el módulo M05 Datasets.
+
+GUARDAR TUS CAMBIOS
+No hay base de datos. Los datos viven en el navegador mientras trabajas y se
+guardan como CSV con Configuración > Exportar CSV (el aviso "CSV sin exportar"
+te recuerda hacerlo). La sesión termina al cerrar la pestaña.
+
+CARPETAS
+- index.html          Sistema completo (HTML + JavaScript, un solo archivo).
+- datos_csv/          Una tabla CSV por entidad: users, projects,
+                      project_members, datasets, architectures, training_jobs,
+                      training_metrics, model_versions, audit_events,
+                      settings, objects.
+- datasets_ejemplo/   Tres datasets de práctica (espiral 3 clases, anillos
+                      2 clases, sensores de planta con 4 variables).
+
+MÓDULOS
+M01 Inicio - M02 Proyectos - M03 Fundamentos - M04 Diseñador de arquitecturas
+(N capas, vista 3D) - M05 Datasets - M06 Entrenamientos (TensorFlow.js, en
+vivo) - M07 Evaluación - M08 Registro de modelos - M09 Reportes -
+M10 Administración y seguridad - Configuración (CSV, límites, cuenta).
+
+LIMITACIONES HONESTAS
+- Roles, auditoría y límites se aplican en el navegador (no hay servidor), así
+  que sirven para demostrar el diseño, no como seguridad real. Un despliegue
+  real necesita el backend FastAPI + PostgreSQL del documento maestro.
+- El entrenamiento corre en el hilo principal del navegador.
+- RNN, CNN y GAN se pueden diseñar y guardar; solo Feedforward se entrena.
+- El código Keras de cada arquitectura se exporta desde el diseñador (sirve en
+  VS Code, Visual Studio o Azure ML).

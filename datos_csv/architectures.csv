@@ -1,0 +1,4 @@
+id,project_id,name,family,version,config_json,created_by,created_at
+a1,p1,MLP 2-16-8-3,Feedforward,1,"{""input"":[2],""layers"":[{""type"":""dense"",""units"":16,""act"":""relu""},{""type"":""dense"",""units"":8,""act"":""relu""}],""out"":3}",u2,1795000000000
+a2,p1,MLP 2-32-16-3,Feedforward,1,"{""input"":[2],""layers"":[{""type"":""dense"",""units"":32,""act"":""relu""},{""type"":""dense"",""units"":16,""act"":""relu""}],""out"":3}",u2,1795000000000
+a3,p2,MLP 2-8-1,Feedforward,1,"{""input"":[2],""layers"":[{""type"":""dense"",""units"":8,""act"":""relu""}],""out"":1}",u3,1795000000000

@@ -1,0 +1,4 @@
+project_id,user_id,role
+p1,u2,owner
+p1,u3,viewer
+p2,u3,owner

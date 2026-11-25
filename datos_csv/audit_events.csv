@@ -1,0 +1,2 @@
+id,actor_id,project_id,action,metadata_json,created_at
+ev1,sistema,,datos_iniciales,"{""origen"":""semilla""}",1795000000000

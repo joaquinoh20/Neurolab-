@@ -1,0 +1,4 @@
+id,username,email,display_name,status,role,password_hash,salt
+u1,joaquinoh20,joaquinoh20@neurolab.local,joaquinoh20,activo,admin,7a6b9a893267ac7762da2d1673f20991060e9d5686333ba29b78e5146c96609f,ee5b1abe4d068d0db1f79f393689dbcd
+u2,luis.ramos,luis.ramos@neurolab.local,Luis Ramos,activo,user,,
+u3,marta.diaz,marta.diaz@neurolab.local,Marta Díaz,activo,user,,

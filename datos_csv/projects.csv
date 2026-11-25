@@ -1,0 +1,4 @@
+id,name,description,owner_id,status,tags,doc,created_at,updated_at
+p1,Clasificación de espirales,Red Feedforward que separa tres brazos de una espiral. Proyecto de demostración con datos sintéticos.,u2,activo,"[""demo"",""feedforward""]","Objetivo: comparar arquitecturas pequeñas sobre un dataset no lineal.
+Datos: sintéticos, sin información sensible.",1795000000000,1795000000000
+p2,Sensores de planta,Clasificación binaria sobre lecturas sintéticas de sensores.,u3,activo,"[""sensores""]","Proyecto de Marta; Luis no es miembro (sirve para probar el control de acceso).",1795000000000,1795000000000

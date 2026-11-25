@@ -1,0 +1,16 @@
+key,value
+maxConcurrent,1
+maxEpochs,300
+maxParams,50000
+maxLayers,20
+maxJobSeconds,180
+maxUploadKB,512
+maxDatasetRows,5000
+ratePerMin,6
+maxActiveJobsPerProject,3
+maxDatasetsPerProject,12
+memoryMB,512
+cpuPauseMs,0
+backend,cpu
+retentionDays,365
+quotaKB,4096

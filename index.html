@@ -1,0 +1,1751 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font:14px system-ui,sans-serif}</style></head><body><title>NeuroLab Enterprise</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: menú lateral compacto + encabezado con contexto (proyecto, migas, perfil) + área de trabajo por módulo M01–M10 */
+:root{
+  --bg:#F2F5F9;--surface:#FFFFFF;--fg:#142235;--muted:#566A7E;--line:#D5DDE7;
+  --nav:#14283F;--nav-fg:#C9D7E6;--nav-on:#223F60;
+  --accent:#1D5FCF;--accent-fg:#FFFFFF;--soft:#E4ECF9;
+  --ok:#11775A;--warn:#8A5A00;--bad:#B42F2F;--okbg:#E2F3EC;--warnbg:#FBF0D9;--badbg:#FBE5E5;
+  --code-bg:#0F1A24;--code-fg:#D6E4F2;
+  --f-head:'Space Grotesk','Inter',system-ui,sans-serif;
+  --f-body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C131A;--surface:#141E28;--fg:#E5ECF3;--muted:#92A3B4;--line:#25333F;
+    --nav:#091017;--nav-fg:#B6C6D6;--nav-on:#1A2B3D;
+    --accent:#6FA3FF;--accent-fg:#0C131A;--soft:#172840;
+    --ok:#4CC9A0;--warn:#E3B341;--bad:#F27D7D;--okbg:#10291F;--warnbg:#2D2410;--badbg:#321818;
+    --code-bg:#091016;--code-fg:#D6E4F2;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C131A;--surface:#141E28;--fg:#E5ECF3;--muted:#92A3B4;--line:#25333F;
+  --nav:#091017;--nav-fg:#B6C6D6;--nav-on:#1A2B3D;
+  --accent:#6FA3FF;--accent-fg:#0C131A;--soft:#172840;
+  --ok:#4CC9A0;--warn:#E3B341;--bad:#F27D7D;--okbg:#10291F;--warnbg:#2D2410;--badbg:#321818;
+  --code-bg:#091016;--code-fg:#D6E4F2;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--f-head);margin:0;text-wrap:balance}
+h2{font-size:17px}h3{font-size:14px}
+a{color:var(--accent)}
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+.nav{background:var(--nav);color:var(--nav-fg);position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow:auto;display:flex;flex-direction:column;padding:14px 8px;padding-left:max(8px,env(safe-area-inset-left,0px))}
+.brand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;color:#fff;font:600 16px var(--f-head)}
+.brand svg{color:#8DB4FF;flex:none}
+.nav button{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px}
+.nav button:hover{background:var(--nav-on)}
+.nav button[aria-current="page"]{background:var(--nav-on);color:#fff;box-shadow:inset 3px 0 0 #8DB4FF}
+.nav button:focus-visible{outline:2px solid #8DB4FF;outline-offset:-2px}
+.nav .mid{font:500 10px var(--f-mono);color:#8DB4FF;min-width:26px}
+.nav .sp{flex:1}
+.nav .small{padding:8px 10px;font-size:11px;color:#8FA3B8}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.topin{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);min-width:0}
+.crumbs b{color:var(--fg);font-weight:600}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.chip .d{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.chip.off .d{background:var(--bad)}
+.menu{display:none}
+.page{padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px;min-width:0}
+.pagehead{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between}
+.pagehead h1{font-size:21px;letter-spacing:-.01em}
+.pagehead p{margin:2px 0 0;color:var(--muted);max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.ph{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.card span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.card b{display:block;font:500 24px var(--f-mono);font-variant-numeric:tabular-nums;margin-top:2px}
+.card small{color:var(--muted)}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;padding:8px 14px;cursor:pointer;font-weight:500;color:var(--muted);white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--accent);border-color:var(--accent)}
+.btn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 13px;font:inherit;font-weight:500;color:var(--fg);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.sm{padding:3px 9px;font-size:12px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px;margin-bottom:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:500;color:var(--muted);min-width:0}
+input:not([type]),input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],select,textarea,input[type=file]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:7px 8px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:64px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.hint{color:var(--muted);font-size:13px;margin:0 0 10px}
+.msg{font-size:13px;margin:8px 0 0}
+.banner{border-radius:6px;padding:8px 12px;font-size:13px;margin:0 0 12px;border:1px solid var(--line)}
+.banner.bad{background:var(--badbg);color:var(--bad);border-color:var(--bad)}
+.banner.warn{background:var(--warnbg);color:var(--warn);border-color:var(--warn)}
+.banner.ok{background:var(--okbg);color:var(--ok);border-color:var(--ok)}
+.banner ul{margin:4px 0 0;padding-left:18px}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:24px;text-align:center;color:var(--muted)}
+.empty h3{color:var(--fg);margin-bottom:4px}
+.scroll{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th,table.t td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--bg);white-space:nowrap}
+table.t td.n,table.t th.n{text-align:right;font-variant-numeric:tabular-nums}
+table.t tr.sel td{background:var(--soft)}
+.mono{font-family:var(--f-mono);font-size:12px}
+.muted{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--bg);white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.pill.QUEUED::before,.pill.borrador::before,.pill.retirado::before,.pill.CANCELLED::before{border-radius:2px}
+.pill.PREPARING::before,.pill.revisado::before{background:var(--warn)}
+.pill.RUNNING::before{background:var(--accent)}
+.pill.COMPLETED::before,.pill.aprobado::before,.pill.activo::before{background:var(--ok)}
+.pill.FAILED::before,.pill.suspendido::before{background:var(--bad);border-radius:1px;transform:rotate(45deg)}
+.prog{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.tile{border-left:3px solid var(--accent);padding:2px 0 2px 10px}
+.tile span{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tile b{font:500 19px var(--f-mono);font-variant-numeric:tabular-nums}
+.code{background:var(--code-bg);color:var(--code-fg);border-radius:6px;padding:12px;margin:0;font:12px/1.55 var(--f-mono);overflow:auto;max-height:320px;white-space:pre}
+.kv{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:6px 14px;margin:0;font-size:13px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+canvas{display:block;width:100%}
+.chart{aspect-ratio:16/10;border:1px solid var(--line);border-radius:6px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+.designer{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:1180px){.designer{grid-template-columns:260px minmax(0,1fr) 270px}}
+.li{display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-bottom:6px;background:var(--bg)}
+.li[aria-current="true"]{border-color:var(--accent);background:var(--soft)}
+.li .lb{flex:1;all:unset;cursor:pointer;flex:1;font-size:13px;min-width:0;overflow-wrap:anywhere}
+.li .lb:focus-visible{outline:2px solid var(--accent)}
+.li button.sm{padding:1px 7px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{background:var(--surface);border:0;padding:6px 12px;font:inherit;font-weight:500;color:var(--fg);cursor:pointer;border-right:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.step{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.step span{padding:3px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.step span.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.step span.done{background:var(--soft);color:var(--fg)}
+.cm th,.cm td{border:1px solid var(--line);padding:6px 10px;text-align:center;font:12px var(--f-mono)}
+.nd{fill:var(--surface);stroke:var(--accent);stroke-width:1.5}.nd.out{fill:var(--accent)}
+.ln{stroke:var(--line);stroke-width:1}
+.tl{fill:var(--fg);font:600 12px var(--f-body)}.sl{fill:var(--muted);font:11px var(--f-mono)}
+.bx{fill:var(--surface);stroke:var(--accent);stroke-width:1.5}
+.who{display:flex;gap:8px;align-items:center}
+.who img{width:26px;height:26px;border-radius:50%;flex:none}
+.scrim{display:none}
+.v3{position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--bg);touch-action:none}
+.v3 canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
+.v3 .tb{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap}
+.v3 .tb button{font-size:12px;padding:3px 9px}
+.v3 .hintb{position:absolute;right:10px;top:8px;font-size:11px;color:var(--muted)}
+.sr{display:flex}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:fixed;left:0;top:0;bottom:0;width:260px;height:auto;z-index:30;transform:translateX(-100%);transition:transform .15s;padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  .app.open .nav{transform:none}
+  .app.open .scrim{display:block;position:fixed;inset:0;background:#0008;z-index:20}
+  .menu{display:inline-flex}
+}
+@media (prefers-reduced-motion:reduce){.nav{transition:none}}
+</style>
+
+<div id="root"><div class="page"><div class="empty"><h3>NeuroLab Enterprise</h3><p>Conectando con la base de datos…</p></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ===== Utilidades ===== */
+const g=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const now=()=>Date.now();
+const fmtDT=t=>t?new Date(t).toLocaleString('es-PE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'—';
+const fmtDur=ms=>{if(ms==null||isNaN(ms))return '—';const s=Math.round(ms/1000);return s<60?s+' s':Math.floor(s/60)+' min '+(s%60)+' s';};
+const pct=v=>(v==null||isNaN(v))?'—':(v*100).toFixed(1)+'%';
+const rid=p=>p+now().toString(36)+Math.random().toString(36).slice(2,6);
+const sid=id=>String(id||'').slice(-5).toUpperCase();
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const csvCell=v=>{let s=String(v==null?'':v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[",\n;]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+const isInt=(v,a,b)=>Number.isInteger(v)&&v>=a&&v<=b;
+
+/* ===== Constantes del dominio ===== */
+const DEFAULTS={maxConcurrent:1,maxEpochs:300,maxParams:50000,maxLayers:20,maxJobSeconds:180,maxUploadKB:512,maxDatasetRows:5000,ratePerMin:6,maxActiveJobsPerProject:3,maxDatasetsPerProject:12,memoryMB:512,cpuPauseMs:0,backend:'cpu',retentionDays:365,quotaKB:4096};
+const LVL={viewer:1,editor:2,owner:3,admin:4};
+const ROLE_ES={viewer:'Lector',editor:'Editor',owner:'Propietario',admin:'Administrador'};
+const ACTION_MIN={read:'viewer',write:'editor',cancel:'editor',review:'editor',export:'editor',approve:'owner',manage:'owner'};
+const canDo=(role,a)=>!!role&&LVL[role]>=LVL[ACTION_MIN[a]];
+const NEXT={QUEUED:['PREPARING','CANCELLED','FAILED'],PREPARING:['RUNNING','FAILED','CANCELLED'],RUNNING:['COMPLETED','FAILED','CANCELLED'],COMPLETED:[],FAILED:[],CANCELLED:[]};
+const STATE_ES={QUEUED:'En cola',PREPARING:'Preparando',RUNNING:'Ejecutando',COMPLETED:'Completado',FAILED:'Fallido',CANCELLED:'Cancelado'};
+const MV_NEXT={borrador:['revisado'],revisado:['aprobado','borrador'],aprobado:['retirado'],retirado:[]};
+const MV_MIN={borrador:'editor',revisado:'editor',aprobado:'owner',retirado:'owner'};
+const PAL=['#0072B2','#E69F00','#009E73','#CC79A7','#56B4E9','#D55E00'];
+const ACTS=['relu','tanh','sigmoid','elu','linear'];
+const OPTS={adam:'Adam',sgd:'SGD',rmsprop:'RMSprop',adagrad:'Adagrad'};
+const HB_STALE=45000;
+
+/* ===== Errores de la capa API ===== */
+class HttpError extends Error{constructor(s,m,d){super(m);this.status=s;this.details=d||[];}}
+const E=(s,m,d)=>new HttpError(s,m,d);
+
+/* ===== Datos sintéticos y CSV ===== */
+const GEN={circles:['Círculos concéntricos',2],xor:['XOR',2],moons:['Dos lunas',2],blobs:['Tres grupos',3],spiral:['Espiral',3]};
+function rng(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+function genData(kind,n,noise,seed){
+  const R=rng(seed),rn=()=>{let u=0;while(u===0)u=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*R());};
+  const X=[],y=[];let i,c,t,r;
+  if(kind==='xor'){for(i=0;i<n;i++){const a=R()*2-1,b=R()*2-1;X.push([a+rn()*noise*.5,b+rn()*noise*.5]);y.push(a*b>0?1:0);}}
+  else if(kind==='circles'){for(i=0;i<n;i++){c=i%2;r=(c?.4:.9)+rn()*noise*.4;t=R()*6.2832;X.push([r*Math.cos(t),r*Math.sin(t)]);y.push(c);}}
+  else if(kind==='moons'){for(i=0;i<n;i++){c=i%2;t=R()*Math.PI;X.push([(c?1-Math.cos(t):Math.cos(t))+rn()*noise,(c?.5-Math.sin(t):Math.sin(t))+rn()*noise]);y.push(c);}}
+  else if(kind==='blobs'){const C3=[[-.6,-.5],[.6,-.4],[0,.7]];for(i=0;i<n;i++){c=i%3;const s=.14+noise*.6;X.push([C3[c][0]+rn()*s,C3[c][1]+rn()*s]);y.push(c);}}
+  else{const per=Math.floor(n/3);for(c=0;c<3;c++)for(i=0;i<per;i++){r=i/per;t=r*4+c*2.0944+rn()*noise*.6;X.push([r*Math.cos(t),r*Math.sin(t)]);y.push(c);}}
+  return{X,y,classes:['Clase A','Clase B','Clase C'].slice(0,GEN[kind][1]),featNames:['x1','x2']};
+}
+function validateCSV(text,meta,S){
+  const checks=[],add=(ok,msg)=>{checks.push({ok,msg});return ok;};
+  S=S||DEFAULTS;meta=meta||{};
+  if(!meta.skip){
+    add(/\.(csv|txt)$/i.test(meta.fileName||''),'Extensión permitida (.csv o .txt)');
+    add((meta.size||text.length)<=S.maxUploadKB*1024,'Tamaño dentro del límite ('+S.maxUploadKB+' KB)');
+    add(!meta.mime||/^(text\/(csv|plain)|application\/(vnd\.ms-excel|csv))$/.test(meta.mime),'Tipo MIME de texto');
+  }
+  const bin=/[\u0000-\u0008\u000E-\u001F]/.test(text.slice(0,4096));
+  add(!bin,'Contenido de texto plano (no se ejecuta ni interpreta código)');
+  let data=null;
+  if(!bin){
+    try{
+      const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      if(lines.length<11)throw new Error('Se necesitan al menos 10 filas de datos.');
+      const sep=lines[0].split(';').length>lines[0].split(',').length?';':',';
+      const rows=lines.map(l=>l.split(sep).map(c=>c.trim().replace(/^"|"$/g,'')));
+      const w=rows[0].length;
+      if(w<2)throw new Error('Se necesitan al menos 2 columnas: variables y clase.');
+      let header=null;
+      if(!rows[0].slice(0,w-1).every(c=>c!==''&&!isNaN(Number(c))))header=rows.shift();
+      const body=rows.filter(r=>r.length===w);
+      if(body.length<10)throw new Error('Quedaron menos de 10 filas válidas; revisa el separador.');
+      if(body.length>S.maxDatasetRows)throw new Error('Máximo '+S.maxDatasetRows+' filas; el archivo trae '+body.length+'.');
+      if(w-1>100)throw new Error('Máximo 100 variables.');
+      const X=body.map(r=>r.slice(0,w-1).map(Number));
+      if(X.some(r=>r.some(v=>!isFinite(v))))throw new Error('Las variables deben ser numéricas y sin celdas vacías (la última columna es la clase).');
+      const labs=body.map(r=>r[w-1]);let u=Array.from(new Set(labs));
+      if(u.length<2)throw new Error('La columna de clase necesita al menos 2 valores distintos.');
+      if(u.length>6)throw new Error('Máximo 6 clases; hay '+u.length+'.');
+      if(u.every(v=>!isNaN(Number(v))))u.sort((a,b)=>a-b);
+      data={X,y:labs.map(l=>u.indexOf(l)),classes:u.map(String),featNames:header?header.slice(0,w-1):Array.from({length:w-1},(_,i)=>'x'+(i+1))};
+      add(true,body.length+' filas · '+(w-1)+' variables · '+u.length+' clases');
+    }catch(e){add(false,e.message);}
+  }
+  return{ok:checks.every(c=>c.ok),checks,data};
+}
+
+/* ===== Validación de arquitecturas (reglas del backend) ===== */
+const FAMS={
+  Feedforward:{train:true,types:['dense','dropout'],doc:'Capas densas totalmente conectadas (MLP).'},
+  RNN:{train:false,types:['simplernn','lstm','gru','dropout','dense'],doc:'Secuencias: RNN simple, LSTM o GRU.'},
+  CNN:{train:false,types:['conv2d','maxpool2d','flatten','dropout','dense'],doc:'Imágenes: convoluciones y pooling.'},
+  GAN:{train:false,types:['dense','dropout'],doc:'Generador y discriminador.'}
+};
+const LNAME={dense:'Densa',dropout:'Dropout',lstm:'LSTM',gru:'GRU',simplernn:'RNN simple',conv2d:'Conv2D',maxpool2d:'MaxPool2D',flatten:'Flatten'};
+const LDEF={dense:{units:16,act:'relu'},dropout:{rate:0.2},lstm:{units:32},gru:{units:32},simplernn:{units:32},conv2d:{filters:8,kernel:3,act:'relu'},maxpool2d:{size:2},flatten:{}};
+const shp=s=>'('+s.join(', ')+')';
+const RECUR=['lstm','gru','simplernn'];
+function runStack(inShape,layers,label,errs,family,group){
+  let sh=inShape.slice(),rows=[],total=0,seenDense=false;
+  layers.forEach((l,i)=>{
+    const where=label+(i+1),nm=where+' · '+(LNAME[l.type]||l.type);let p=0,out=sh,det='';
+    if(!FAMS[family].types.includes(l.type)){errs.push(where+': el tipo «'+l.type+'» no existe en la familia '+family+'.');rows.push({name:nm,shape:shp(sh),params:0,det:'no válida',group});return;}
+    if(l.type==='dense'){
+      if(sh.length!==1)errs.push(where+': la capa Densa necesita entrada plana; la forma actual es '+shp(sh)+'.'+(family==='CNN'?' Agrega Flatten antes.':''));
+      if(!isInt(l.units,1,512))errs.push(where+': neuronas debe ser un entero entre 1 y 512.');
+      if(!ACTS.includes(l.act))errs.push(where+': activación no válida.');
+      if(sh.length===1&&isInt(l.units,1,512)){p=sh[0]*l.units+l.units;out=[l.units];}
+      seenDense=true;det=l.act;
+    }else if(l.type==='dropout'){
+      if(!(typeof l.rate==='number'&&l.rate>=0&&l.rate<=0.9))errs.push(where+': la tasa de dropout debe estar entre 0 y 0.9.');
+      det='tasa '+l.rate;
+    }else if(RECUR.includes(l.type)){
+      if(seenDense)errs.push(where+': las capas recurrentes deben ir antes de las densas.');
+      if(sh.length!==2)errs.push(where+': la capa recurrente necesita una secuencia (pasos, variables); forma actual '+shp(sh)+'.');
+      if(!isInt(l.units,1,256))errs.push(where+': unidades debe ser un entero entre 1 y 256.');
+      if(sh.length===2&&isInt(l.units,1,256)){
+        const u=l.units,f=sh[1];
+        p=l.type==='lstm'?4*(f*u+u*u+u):l.type==='gru'?3*(f*u+u*u+2*u):(f*u+u*u+u);
+        const more=layers.slice(i+1).some(x=>RECUR.includes(x.type));
+        out=more?[sh[0],u]:[u];det=more?'devuelve secuencia':'devuelve último paso';
+      }
+    }else if(l.type==='conv2d'){
+      if(sh.length!==3)errs.push(where+': Conv2D necesita imagen (alto, ancho, canales); forma actual '+shp(sh)+'.');
+      if(!isInt(l.filters,1,256))errs.push(where+': filtros debe ser un entero entre 1 y 256.');
+      if(!isInt(l.kernel,1,7))errs.push(where+': el kernel debe ser un entero entre 1 y 7.');
+      if(sh.length===3&&isInt(l.filters,1,256)&&isInt(l.kernel,1,7)){
+        if(l.kernel>sh[0]||l.kernel>sh[1])errs.push(where+': el kernel '+l.kernel+' excede la imagen '+shp(sh)+'.');
+        else{p=l.kernel*l.kernel*sh[2]*l.filters+l.filters;out=[sh[0]-l.kernel+1,sh[1]-l.kernel+1,l.filters];}
+      }
+      det=l.kernel+'×'+l.kernel+' · '+l.act;
+    }else if(l.type==='maxpool2d'){
+      if(sh.length!==3)errs.push(where+': MaxPool2D necesita imagen; forma actual '+shp(sh)+'.');
+      if(!isInt(l.size,2,4))errs.push(where+': el tamaño de pooling debe ser 2, 3 o 4.');
+      if(sh.length===3&&isInt(l.size,2,4)){
+        if(l.size>sh[0]||l.size>sh[1])errs.push(where+': el pooling '+l.size+' excede la forma '+shp(sh)+'.');
+        else out=[Math.floor(sh[0]/l.size),Math.floor(sh[1]/l.size),sh[2]];
+      }
+      det='ventana '+l.size;
+    }else if(l.type==='flatten'){
+      if(sh.length<2)errs.push(where+': la entrada ya es plana.');
+      else out=[sh.reduce((a,b)=>a*b,1)];
+    }
+    sh=out;total+=p;rows.push({name:nm,shape:shp(sh),params:p,det,group});
+  });
+  return{sh,rows,total};
+}
+function validateArch(family,cfg,maxL){
+  const errs=[];let rows=[],params=0;maxL=maxL||DEFAULTS.maxLayers;
+  if(!FAMS[family])return{ok:false,errors:['Familia no reconocida: '+family+'.'],rows,params:0};
+  if(!cfg||typeof cfg!=='object')return{ok:false,errors:['Configuración vacía.'],rows,params:0};
+  if(family==='GAN'){
+    if(!isInt(cfg.latent_dim,2,256))errs.push('Dimensión latente: entero entre 2 y 256.');
+    if(!isInt(cfg.data_dim,1,256))errs.push('Dimensión de los datos: entero entre 1 y 256.');
+    [['generator','Generador','G'],['discriminator','Discriminador','D']].forEach(([k,nm,lb])=>{
+      if(!Array.isArray(cfg[k])||cfg[k].length<1)errs.push('El '+nm.toLowerCase()+' necesita al menos una capa oculta.');
+      else if(cfg[k].length>maxL)errs.push('El '+nm.toLowerCase()+' supera el máximo de '+maxL+' capas.');
+    });
+    if(!errs.length){
+      const gs=runStack([cfg.latent_dim],cfg.generator,'G',errs,family,'Generador');
+      rows.push({name:'G · Entrada latente',shape:shp([cfg.latent_dim]),params:0,det:'',group:'Generador'},...gs.rows);
+      const go=gs.sh.length===1?gs.sh[0]*cfg.data_dim+cfg.data_dim:0;
+      rows.push({name:'G · Salida',shape:shp([cfg.data_dim]),params:go,det:'tanh',group:'Generador'});
+      const ds=runStack([cfg.data_dim],cfg.discriminator,'D',errs,family,'Discriminador');
+      rows.push({name:'D · Entrada datos',shape:shp([cfg.data_dim]),params:0,det:'',group:'Discriminador'},...ds.rows);
+      const dout=ds.sh.length===1?ds.sh[0]+1:0;
+      rows.push({name:'D · Salida',shape:'(1)',params:dout,det:'sigmoid',group:'Discriminador'});
+      params=gs.total+go+ds.total+dout;
+    }
+  }else{
+    const inp=cfg.input,need={Feedforward:1,RNN:2,CNN:3}[family];
+    const lim={Feedforward:[[1,100]],RNN:[[1,500],[1,100]],CNN:[[4,128],[4,128],[1,4]]}[family];
+    if(!Array.isArray(inp)||inp.length!==need||inp.some((v,i)=>!isInt(v,lim[i][0],lim[i][1])))errs.push('Forma de entrada no válida para '+family+' (revisa los límites de cada dimensión).');
+    if(!Array.isArray(cfg.layers))errs.push('Las capas deben ser una lista.');
+    else if(cfg.layers.length>maxL)errs.push('Máximo '+maxL+' capas ocultas.');
+    if(!isInt(cfg.out,1,100))errs.push('Las neuronas de salida deben ser un entero entre 1 y 100.');
+    if(!errs.length){
+      rows.push({name:'Entrada',shape:shp(inp),params:0,det:''});
+      const r=runStack(inp,cfg.layers,'C',errs,family);
+      rows.push(...r.rows);params=r.total;
+      if(r.sh.length!==1)errs.push('La salida necesita una entrada plana; forma actual '+shp(r.sh)+(family==='CNN'?'. Agrega Flatten.':'.'));
+      else{const p=r.sh[0]*cfg.out+cfg.out;params+=p;rows.push({name:'Salida',shape:shp([cfg.out]),params:p,det:cfg.out===1?'sigmoid':'softmax'});}
+    }
+  }
+  return{ok:errs.length===0,errors:errs,rows,params};
+}
+function defaultCfg(f){
+  if(f==='RNN')return{input:[20,4],layers:[{type:'lstm',units:32},{type:'dropout',rate:0.2}],out:2};
+  if(f==='CNN')return{input:[16,16,1],layers:[{type:'conv2d',filters:8,kernel:3,act:'relu'},{type:'maxpool2d',size:2},{type:'flatten'},{type:'dense',units:16,act:'relu'}],out:3};
+  if(f==='GAN')return{latent_dim:8,data_dim:2,generator:[{type:'dense',units:16,act:'relu'}],discriminator:[{type:'dense',units:16,act:'relu'}]};
+  return{input:[2],layers:[{type:'dense',units:16,act:'relu'},{type:'dense',units:8,act:'relu'}],out:3};
+}
+function kerasCode(a,p){
+  if(a.family!=='Feedforward')return '# La familia '+a.family+' está documentada; su entrenamiento aún no está habilitado.';
+  const c=a.config_json,n=c.out,L=['    layers.Input(shape=('+c.input[0]+',)),'];
+  c.layers.forEach(l=>L.push(l.type==='dense'?'    layers.Dense('+l.units+', activation="'+l.act+'"),':'    layers.Dropout('+l.rate+'),'));
+  L.push('    layers.Dense('+n+', activation="'+(n===1?'sigmoid':'softmax')+'"),');
+  return ['import tensorflow as tf','from tensorflow import keras','from tensorflow.keras import layers','','model = keras.Sequential([',...L,'])',
+   'model.compile(optimizer=keras.optimizers.'+OPTS[p.optimizer]+'(learning_rate='+p.lr+'),','              loss="'+(n===1?'binary_crossentropy':'categorical_crossentropy')+'",','              metrics=["accuracy"])',
+   '# Con 2 o más salidas use etiquetas one-hot.','model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs='+p.epochs+', batch_size='+p.batch+')'].join('\n');
+}
+async function sha256(s){
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  catch(e){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return 'fnv-'+(h>>>0).toString(16).padStart(8,'0');}
+}
+async function pwHash(pass,salt){
+  if(!(window.crypto&&window.crypto.subtle))throw E(500,'Este navegador no permite verificar contraseñas (abre el sistema desde un archivo local, localhost o HTTPS).');
+  const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveBits']);
+  const b=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new TextEncoder().encode(salt),iterations:100000},k,256);
+  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function splitIdx(n,seed,sp){
+  const R=rng(seed+7),idx=Array.from({length:n},(_,i)=>i);
+  for(let i=n-1;i>0;i--){const j=Math.floor(R()*(i+1));const t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  const nt=Math.floor(n*sp.tr/100),nv=Math.floor(n*sp.va/100);
+  return{tr:idx.slice(0,nt),va:idx.slice(nt,nt+nv),te:idx.slice(nt+nv)};
+}
+
+/* ===== Almacén de datos: una tabla CSV por entidad ===== */
+const TABLES={
+  users:['id','username','email','display_name','status','role','password_hash','salt'],
+  projects:['id','name','description','owner_id','status','tags','doc','created_at','updated_at'],
+  project_members:['project_id','user_id','role'],
+  datasets:['id','project_id','name','version','storage_key','metadata_json','created_by','created_at'],
+  architectures:['id','project_id','name','family','version','config_json','created_by','created_at'],
+  training_jobs:['id','project_id','architecture_id','dataset_id','status','progress','created_by','priority','created_at','started_at','ended_at','state_reason','params_json','snapshot_json','result_json','notes','label','retry_of','cancel_requested','last_json','logs_json'],
+  training_metrics:['id','job_id','epoch','metric_name','metric_value','recorded_at'],
+  model_versions:['id','project_id','job_id','version','storage_key','status','checksum','created_at','created_by','meta_json'],
+  audit_events:['id','actor_id','project_id','action','metadata_json','created_at'],
+  settings:['key','value'],
+  objects:['key','kind','content']
+};
+const NUMC=new Set(['version','progress','priority','created_at','started_at','ended_at','epoch','metric_value','recorded_at','updated_at']);
+const BOOLC=new Set(['cancel_requested']);
+const FREE=new Set(['name','description','doc','notes','display_name','email','label','state_reason','action']);
+const isJ=c=>/_json$/.test(c)||c==='tags';
+const qt=s=>/[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+function cell(c,v){
+  if(isJ(c))return qt(JSON.stringify(v==null?(c==='tags'?[]:null):v));
+  if(v==null)return '';
+  if(typeof v==='number'||typeof v==='boolean')return String(v);
+  return FREE.has(c)?csvCell(v):qt(String(v));
+}
+function parseRows(text){
+  const rows=[];let row=[],f='',q=false;
+  text=text.replace(/^﻿/,'');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true;
+    else if(c===','){row.push(f);f='';}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);f='';rows.push(row);row=[];}
+    else f+=c;
+  }
+  if(f!==''||row.length){row.push(f);rows.push(row);}
+  return rows.filter(r=>!(r.length===1&&r[0]===''));
+}
+function coerce(c,v){
+  if(isJ(c)){if(v===''||v==null)return c==='tags'?[]:null;try{return JSON.parse(v);}catch(e){return c==='tags'?[]:null;}}
+  if(c==='retry_of'||c==='project_id')return v===''?null:v;
+  if(NUMC.has(c))return v===''?null:Number(v);
+  if(BOOLC.has(c))return v==='true';
+  if(FREE.has(c)&&/^'[=+\-@\t\r]/.test(v))return v.slice(1);
+  return v;
+}
+function tableFromCSV(name,text){
+  const rows=parseRows(text);
+  if(!rows.length)throw new Error(name+'.csv está vacío.');
+  const head=rows[0].map(h=>h.trim()),miss=TABLES[name].filter(c=>!head.includes(c));
+  if(miss.length)throw new Error(name+'.csv: faltan las columnas '+miss.join(', ')+'.');
+  return rows.slice(1).map(r=>{const o={};TABLES[name].forEach(c=>{const i=head.indexOf(c);o[c]=coerce(c,i>=0&&r[i]!=null?r[i]:'');});return o;});
+}
+function tableToCSV(name){
+  const cols=TABLES[name];let rows;
+  if(name==='settings')rows=Object.keys(DB.settings).map(k=>({key:k,value:DB.settings[k]}));
+  else if(name==='objects')rows=Object.keys(DB.objects).map(k=>({key:k,kind:DB.objects[k].kind,content:DB.objects[k].content}));
+  else rows=DB[name];
+  return [cols.join(',')].concat(rows.map(r=>cols.map(c=>cell(c,r[c])).join(','))).join('\n')+'\n';
+}
+function tableCount(name){return name==='settings'||name==='objects'?Object.keys(DB[name]).length:DB[name].length;}
+
+const T0=1795000000000;
+function seed(){
+  const d={_rev:1,_exported:1,settings:Object.assign({},DEFAULTS),objects:{}};
+  const mk=(id,n,e,r,un,h,s)=>({id,username:un,display_name:n,email:e,status:'activo',role:r,password_hash:h||'',salt:s||''});
+  d.users=[mk('u1','joaquinoh20','joaquinoh20@neurolab.local','admin','joaquinoh20','7a6b9a893267ac7762da2d1673f20991060e9d5686333ba29b78e5146c96609f','ee5b1abe4d068d0db1f79f393689dbcd'),mk('u2','Luis Ramos','luis.ramos@neurolab.local','user','luis.ramos'),mk('u3','Marta Díaz','marta.diaz@neurolab.local','user','marta.diaz')];
+  d.projects=[
+    {id:'p1',name:'Clasificación de espirales',description:'Red Feedforward que separa tres brazos de una espiral. Proyecto de demostración con datos sintéticos.',owner_id:'u2',status:'activo',tags:['demo','feedforward'],doc:'Objetivo: comparar arquitecturas pequeñas sobre un dataset no lineal.\nDatos: sintéticos, sin información sensible.',created_at:T0,updated_at:T0},
+    {id:'p2',name:'Sensores de planta',description:'Clasificación binaria sobre lecturas sintéticas de sensores.',owner_id:'u3',status:'activo',tags:['sensores'],doc:'Proyecto de Marta; Luis no es miembro (sirve para probar el control de acceso).',created_at:T0,updated_at:T0}];
+  d.project_members=[{project_id:'p1',user_id:'u2',role:'owner'},{project_id:'p1',user_id:'u3',role:'viewer'},{project_id:'p2',user_id:'u3',role:'owner'}];
+  const gm=(kind,n,noise,seedN,k,desc)=>({source:'generado',kind,n,noise,seed:seedN,rows:kind==='spiral'?Math.floor(n/3)*3:n,nFeat:2,classes:['Clase A','Clase B','Clase C'].slice(0,k),featNames:['x1','x2'],split:{tr:70,va:15,te:15},description:desc});
+  d.datasets=[
+    {id:'d1',project_id:'p1',name:'Espiral 3 clases',version:1,storage_key:'gen:d1',metadata_json:gm('spiral',300,0.1,42,3,'Espiral sintética (semilla 42).'),created_by:'u2',created_at:T0},
+    {id:'d2',project_id:'p2',name:'Planta A círculos',version:1,storage_key:'gen:d2',metadata_json:gm('circles',400,0.08,7,2,'Dos anillos concéntricos.'),created_by:'u3',created_at:T0}];
+  const ff=(n,u,o)=>({input:[2],layers:u.map(x=>({type:'dense',units:x,act:'relu'})),out:o});
+  d.architectures=[
+    {id:'a1',project_id:'p1',name:'MLP 2-16-8-3',family:'Feedforward',version:1,config_json:ff(0,[16,8],3),created_by:'u2',created_at:T0},
+    {id:'a2',project_id:'p1',name:'MLP 2-32-16-3',family:'Feedforward',version:1,config_json:ff(0,[32,16],3),created_by:'u2',created_at:T0},
+    {id:'a3',project_id:'p2',name:'MLP 2-8-1',family:'Feedforward',version:1,config_json:ff(0,[8],1),created_by:'u3',created_at:T0}];
+  d.training_jobs=[];d.training_metrics=[];d.model_versions=[];
+  d.audit_events=[{id:'ev1',actor_id:'sistema',project_id:null,action:'datos_iniciales',metadata_json:{origen:'semilla'},created_at:T0}];
+  return d;
+}
+
+/* ===== Estado global, persistencia local y sesión ===== */
+let DB=null,SES=null,NOLOG=false,NOPERSIST=false,NOSCHED=false;
+const LSK='neurolab.csvstore.v3',LSS='neurolab.session.v3';
+let ptimer=0;
+function persist(){
+  if(NOPERSIST)return;
+  DB._rev=(DB._rev||0)+1;
+  if(ptimer)return;
+  ptimer=setTimeout(()=>{ptimer=0;try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){}},600);
+}
+const isDirty=()=>DB._rev>DB._exported;
+function usageKB(){let n=0;Object.keys(DB.objects).forEach(k=>{n+=DB.objects[k].content.length;});return Math.round(n/1024);}
+const bus={rt:true,ls:[],emit(e){if(bus.rt)bus.ls.forEach(f=>f(e));}};
+const API_LOG=[];
+function def(method,path,fn){
+  return async(...a)=>{
+    const t0=performance.now();let st=200;
+    try{return await fn(...a);}catch(e){st=e.status||500;throw e;}
+    finally{if(!NOLOG){API_LOG.unshift({t:now(),method,path,st,ms:Math.round(performance.now()-t0),u:SES});if(API_LOG.length>80)API_LOG.pop();}}
+  };
+}
+function audit(action,pid,meta,actor){
+  DB.audit_events.unshift({id:rid('ev'),actor_id:actor||SES||'sistema',project_id:pid||null,action,metadata_json:meta||{},created_at:now()});
+  if(DB.audit_events.length>4000)DB.audit_events.length=4000;
+}
+function me(){const u=SES&&DB.users.find(x=>x.id===SES);if(!u||u.status!=='activo')throw E(401,'Sesión no válida.');return u;}
+function roleOf(p,u){if(u.role==='admin')return 'admin';const m=DB.project_members.find(x=>x.project_id===p.id&&x.user_id===u.id);return m?m.role:null;}
+function need(pid,action){
+  const u=me(),p=DB.projects.find(x=>x.id===pid);
+  if(!p)throw E(404,'Proyecto no encontrado.');
+  const r=roleOf(p,u);
+  if(!r){audit('acceso_denegado',pid,{});throw E(403,'No perteneces a este proyecto.');}
+  if(!canDo(r,action))throw E(403,'Tu rol ('+ROLE_ES[r]+') no permite esta acción.');
+  return{p,u,r};
+}
+const uname=id=>{const u=DB.users.find(x=>x.id===id);return u?u.display_name:(id==='sistema'||id==='worker'?id:'—');};
+const S=()=>DB.settings;
+const ROWC={};
+function getRows(ds){
+  if(ROWC[ds.storage_key])return ROWC[ds.storage_key];
+  const m=ds.metadata_json;let r;
+  if(m.source==='generado')r=genData(m.kind,m.n,m.noise,m.seed);
+  else{const o=DB.objects[ds.storage_key];const v=validateCSV(o?o.content:'',{skip:true},S());if(!v.data)throw new Error('El archivo del dataset no está disponible. Vuelve a cargar los CSV.');r=v.data;}
+  ROWC[ds.storage_key]=r;return r;
+}
+function cleanText(s,max){return String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').trim().slice(0,max);}
+
+/* ===== Servicios (API /api/v1 sobre las tablas CSV) ===== */
+const svc={};
+const FAILS={};
+svc.login=def('POST','/api/v1/auth/login',async(username,password)=>{
+  const key=String(username||'').trim().toLowerCase().slice(0,64);
+  if(!key||!password)throw E(422,'Escribe tu usuario y tu contraseña.');
+  const f=FAILS[key]||(FAILS[key]={n:0,until:0});
+  if(now()<f.until)throw E(429,'Demasiados intentos fallidos. Espera '+Math.ceil((f.until-now())/1000)+' s e inténtalo de nuevo.');
+  const u=DB.users.find(x=>String(x.username||'').toLowerCase()===key);
+  const okp=!!(u&&u.password_hash&&u.salt&&(await pwHash(String(password),u.salt))===u.password_hash);
+  if(!okp){f.n++;if(f.n>=5){f.until=now()+60000;f.n=0;}audit('inicio_sesion_fallido',null,{usuario:key.slice(0,40)},'sistema');persist();throw E(401,'Usuario o contraseña incorrectos.');}
+  if(u.status!=='activo')throw E(403,'La cuenta está suspendida.');
+  f.n=0;SES=u.id;try{sessionStorage.setItem(LSS,u.id);}catch(e){}
+  audit('inicio_sesion',null,{});persist();return u;
+});
+svc.logout=def('POST','/api/v1/auth/logout',async()=>{audit('cierre_sesion',null,{});SES=null;try{sessionStorage.removeItem(LSS);}catch(e){}persist();});
+function visible(u){return u.role==='admin'?DB.projects.slice():DB.projects.filter(p=>DB.project_members.some(m=>m.project_id===p.id&&m.user_id===u.id));}
+svc.listProjects=def('GET','/api/v1/projects',async(f)=>{
+  const u=me();f=f||{};const q=(f.q||'').toLowerCase();
+  return visible(u).filter(p=>(!f.status||p.status===f.status)&&(!q||(p.name+' '+p.description+' '+p.tags.join(' ')).toLowerCase().includes(q)))
+    .map(p=>({...p,role:roleOf(p,u),members:DB.project_members.filter(m=>m.project_id===p.id).length,jobs:DB.training_jobs.filter(j=>j.project_id===p.id).length}))
+    .sort((a,b)=>b.updated_at-a.updated_at);
+});
+svc.getProject=def('GET','/api/v1/projects/{id}',async pid=>{
+  const{p,r}=need(pid,'read');
+  return{p,role:r,members:DB.project_members.filter(m=>m.project_id===pid).map(m=>({...m,name:uname(m.user_id),email:(DB.users.find(x=>x.id===m.user_id)||{}).email||''}))};
+});
+function projFields(f){
+  const errs=[],name=cleanText(f.name,80),description=cleanText(f.description,400),doc=cleanText(f.doc,2000);
+  const tags=String(f.tags||'').split(',').map(t=>cleanText(t,24).toLowerCase()).filter(Boolean).slice(0,8);
+  if(name.length<3)errs.push('El nombre necesita al menos 3 caracteres.');
+  if(errs.length)throw E(422,'Revisa los datos del proyecto.',errs);
+  return{name,description,doc,tags};
+}
+svc.createProject=def('POST','/api/v1/projects',async f=>{
+  const u=me(),x=projFields(f),id=rid('p'),t=now();
+  DB.projects.push({id,...x,owner_id:u.id,status:'activo',created_at:t,updated_at:t});
+  DB.project_members.push({project_id:id,user_id:u.id,role:'owner'});
+  audit('proyecto_creado',id,{nombre:x.name});persist();bus.emit({type:'data'});return id;
+});
+svc.updateProject=def('PATCH','/api/v1/projects/{id}',async(pid,f)=>{
+  const{p}=need(pid,'manage'),x=projFields(f);
+  Object.assign(p,x,{updated_at:now()});
+  if(f.status&&['activo','archivado'].includes(f.status))p.status=f.status;
+  audit('proyecto_actualizado',pid,{estado:p.status});persist();bus.emit({type:'data'});
+});
+svc.addMember=def('POST','/api/v1/projects/{id}/members',async(pid,uid,role)=>{
+  need(pid,'manage');
+  if(!DB.users.find(x=>x.id===uid))throw E(404,'Usuario no encontrado.');
+  if(!['owner','editor','viewer'].includes(role))throw E(422,'Rol no válido.');
+  if(DB.project_members.some(m=>m.project_id===pid&&m.user_id===uid))throw E(409,'El usuario ya es miembro.');
+  DB.project_members.push({project_id:pid,user_id:uid,role});
+  audit('miembro_agregado',pid,{usuario:uid,rol:role});persist();bus.emit({type:'data'});
+});
+svc.setMember=def('PATCH','/api/v1/projects/{id}/members/{uid}',async(pid,uid,role)=>{
+  need(pid,'manage');
+  const m=DB.project_members.find(x=>x.project_id===pid&&x.user_id===uid);
+  if(!m)throw E(404,'Miembro no encontrado.');
+  if(!['owner','editor','viewer'].includes(role))throw E(422,'Rol no válido.');
+  if(m.role==='owner'&&role!=='owner'&&DB.project_members.filter(x=>x.project_id===pid&&x.role==='owner').length<2)throw E(409,'El proyecto debe conservar al menos un propietario.');
+  const old=m.role;m.role=role;
+  audit('permiso_cambiado',pid,{usuario:uid,de:old,a:role});persist();bus.emit({type:'data'});
+});
+svc.removeMember=def('DELETE','/api/v1/projects/{id}/members/{uid}',async(pid,uid)=>{
+  need(pid,'manage');
+  const m=DB.project_members.find(x=>x.project_id===pid&&x.user_id===uid);
+  if(!m)throw E(404,'Miembro no encontrado.');
+  if(m.role==='owner'&&DB.project_members.filter(x=>x.project_id===pid&&x.role==='owner').length<2)throw E(409,'El proyecto debe conservar al menos un propietario.');
+  DB.project_members.splice(DB.project_members.indexOf(m),1);
+  audit('miembro_quitado',pid,{usuario:uid});persist();bus.emit({type:'data'});
+});
+svc.validateArch=def('POST','/api/v1/architectures/validate',async(family,cfg)=>validateArch(family,cfg,S().maxLayers));
+svc.listArchs=def('GET','/api/v1/projects/{id}/architectures',async pid=>{need(pid,'read');return DB.architectures.filter(a=>a.project_id===pid).sort((a,b)=>b.created_at-a.created_at);});
+svc.createArch=def('POST','/api/v1/projects/{id}/architectures',async(pid,f)=>{
+  const{u}=need(pid,'write'),name=cleanText(f.name,60);
+  const errs=[];if(name.length<3)errs.push('El nombre necesita al menos 3 caracteres.');
+  const v=validateArch(f.family,f.config,S().maxLayers);
+  if(!v.ok)errs.push(...v.errors);
+  if(errs.length)throw E(422,'La arquitectura no es válida.',errs);
+  const ver=Math.max(0,...DB.architectures.filter(a=>a.project_id===pid&&a.name===name).map(a=>a.version))+1;
+  const id=rid('a');
+  DB.architectures.push({id,project_id:pid,name,family:f.family,version:ver,config_json:clone(f.config),created_by:u.id,created_at:now()});
+  audit('arquitectura_creada',pid,{nombre:name,version:ver,familia:f.family,parametros:v.params});persist();bus.emit({type:'data'});return{id,version:ver,params:v.params};
+});
+svc.listDatasets=def('GET','/api/v1/projects/{id}/datasets',async pid=>{need(pid,'read');return DB.datasets.filter(d=>d.project_id===pid).sort((a,b)=>b.created_at-a.created_at);});
+svc.createDataset=def('POST','/api/v1/projects/{id}/datasets',async(pid,f)=>{
+  const{u}=need(pid,'write'),name=cleanText(f.name,60).replace(/[^\w .\-áéíóúñÁÉÍÓÚÑ]/g,''),errs=[];
+  if(name.length<3)errs.push('El nombre necesita al menos 3 caracteres.');
+  const sp={tr:Math.round(+f.tr),va:Math.round(+f.va)};
+  if(!isInt(sp.tr,50,90)||!isInt(sp.va,5,30)||100-sp.tr-sp.va<5)errs.push('La separación debe dejar entrenamiento 50–90 %, validación 5–30 % y prueba de al menos 5 %.');
+  if(DB.datasets.filter(d=>d.project_id===pid).length>=S().maxDatasetsPerProject)errs.push('El proyecto alcanzó el máximo de '+S().maxDatasetsPerProject+' datasets.');
+  const id=rid('d');let meta,key;
+  if(f.source==='csv'){
+    const v=validateCSV(f.text||'',{fileName:f.fileName,size:f.size,mime:f.mime},S());
+    if(!v.ok)errs.push(...v.checks.filter(c=>!c.ok).map(c=>c.msg));
+    else{
+      if(usageKB()+f.text.length/1024>S().quotaKB)errs.push('Cuota de almacenamiento agotada ('+S().quotaKB+' KB).');
+      meta={source:'csv',fileName:cleanText(f.fileName,80),rows:v.data.X.length,nFeat:v.data.X[0].length,classes:v.data.classes,featNames:v.data.featNames};
+      key='csv_'+id;
+    }
+  }else{
+    if(!GEN[f.kind])errs.push('Tipo de dataset generado no reconocido.');
+    const n=Math.round(+f.n),noise=+f.noise;
+    if(!isInt(n,60,2000)||!(noise>=0&&noise<=0.4))errs.push('Muestras entre 60 y 2000 y ruido entre 0 y 0.4.');
+    if(!errs.length){const sd=Math.floor(Math.random()*9000)+100;const dd=genData(f.kind,n,noise,sd);meta={source:'generado',kind:f.kind,n,noise,seed:sd,rows:dd.X.length,nFeat:2,classes:dd.classes,featNames:dd.featNames};key='gen:'+id;}
+  }
+  if(errs.length)throw E(422,'No se pudo registrar el dataset.',errs);
+  meta.split={tr:sp.tr,va:sp.va,te:100-sp.tr-sp.va};meta.description=cleanText(f.description,300);
+  if(f.source==='csv')DB.objects[key]={kind:'dataset',content:f.text};
+  const ver=Math.max(0,...DB.datasets.filter(d=>d.project_id===pid&&d.name===name).map(d=>d.version))+1;
+  DB.datasets.push({id,project_id:pid,name,version:ver,storage_key:key,metadata_json:meta,created_by:u.id,created_at:now()});
+  audit('dataset_registrado',pid,{nombre:name,version:ver,filas:meta.rows,origen:meta.source});persist();bus.emit({type:'data'});return id;
+});
+svc.deleteDataset=def('DELETE','/api/v1/projects/{id}/datasets/{did}',async(pid,did)=>{
+  need(pid,'write');
+  const d=DB.datasets.find(x=>x.id===did&&x.project_id===pid);
+  if(!d)throw E(404,'Dataset no encontrado.');
+  if(DB.training_jobs.some(j=>j.dataset_id===did))throw E(409,'El dataset está referenciado por entrenamientos; se conserva por trazabilidad.');
+  DB.datasets.splice(DB.datasets.indexOf(d),1);delete DB.objects[d.storage_key];delete ROWC[d.storage_key];
+  audit('dataset_eliminado',pid,{nombre:d.name,version:d.version});persist();bus.emit({type:'data'});
+});
+svc.previewDataset=def('GET','/api/v1/projects/{id}/datasets/{did}/preview',async(pid,did)=>{
+  need(pid,'read');
+  const d=DB.datasets.find(x=>x.id===did&&x.project_id===pid);
+  if(!d)throw E(404,'Dataset no encontrado.');
+  const r=getRows(d),cnt=r.classes.map(()=>0);r.y.forEach(v=>cnt[v]++);
+  return{head:r.X.slice(0,8).map((x,i)=>x.map(v=>+v.toFixed(3)).concat([r.classes[r.y[i]]])),cols:r.featNames.concat(['clase']),counts:cnt,classes:r.classes};
+});
+
+/* ===== Trabajos de entrenamiento ===== */
+const TERMINAL=['COMPLETED','FAILED','CANCELLED'];
+const canTransition=(a,b)=>!!NEXT[a]&&NEXT[a].includes(b);
+const isActive=j=>j.status==='QUEUED'||j.status==='PREPARING'||j.status==='RUNNING';
+const RUNNING={},LIVEW={};
+function jlog(j,m){j.logs_json.push({t:now(),m:cleanText(m,220)});if(j.logs_json.length>60)j.logs_json.shift();}
+function transition(j,to,reason){
+  if(!canTransition(j.status,to))throw new Error('Transición inválida '+j.status+' → '+to);
+  j.status=to;if(reason!=null)j.state_reason=reason;
+  if(to==='PREPARING')j.started_at=now();
+  if(TERMINAL.includes(to)){j.ended_at=now();if(to==='COMPLETED')j.progress=100;audit('entrenamiento_'+to.toLowerCase(),j.project_id,{job:j.id,motivo:reason||''},'worker');}
+  jlog(j,STATE_ES[to]+(reason?': '+reason:''));
+  persist();bus.emit({type:'job',id:j.id});
+}
+function confirmQueuedCancels(){
+  DB.training_jobs.filter(j=>j.status==='QUEUED'&&j.cancel_requested).forEach(j=>transition(j,'CANCELLED','Cancelado por solicitud del usuario antes de iniciar (confirmado por el worker).'));
+}
+function series(jid){
+  const s={loss:[],accuracy:[],val_loss:[],val_accuracy:[]};
+  DB.training_metrics.forEach(m=>{if(m.job_id===jid&&s[m.metric_name])s[m.metric_name][m.epoch-1]=m.metric_value;});
+  return s;
+}
+function jobRow(j){
+  const p=DB.projects.find(x=>x.id===j.project_id),a=DB.architectures.find(x=>x.id===j.architecture_id),d=DB.datasets.find(x=>x.id===j.dataset_id);
+  const sn=j.snapshot_json||{};
+  return{...j,no:'E-'+sid(j.id),project:p?p.name:'—',arch:sn.architecture?sn.architecture.name+' v'+sn.architecture.version:(a?a.name:'—'),dataset:sn.dataset?sn.dataset.name+' v'+sn.dataset.version:(d?d.name:'—'),
+    dur:j.started_at?(j.ended_at||now())-j.started_at:null,by:uname(j.created_by)};
+}
+svc.createJob=def('POST','/api/v1/projects/{id}/training-jobs',async(pid,f)=>{
+  const{u,r}=need(pid,'write'),st=S();
+  if(DB.training_jobs.filter(j=>j.created_by===u.id&&now()-j.created_at<60000).length>=st.ratePerMin)throw E(429,'Límite de tasa: máximo '+st.ratePerMin+' entrenamientos por minuto por usuario.');
+  const errs=[],a=DB.architectures.find(x=>x.id===f.architecture_id&&x.project_id===pid),d=DB.datasets.find(x=>x.id===f.dataset_id&&x.project_id===pid);
+  const ep=Math.round(+f.epochs),bs=Math.round(+f.batch),lr=+f.lr,sd=Math.round(+f.seed),opt=f.optimizer;
+  if(!a)errs.push('Selecciona una arquitectura válida del proyecto.');
+  if(!d)errs.push('Selecciona un dataset válido del proyecto.');
+  let pcount=0;
+  if(a){
+    const v=validateArch(a.family,a.config_json,st.maxLayers);pcount=v.params;
+    if(!v.ok)errs.push('La arquitectura no es válida: '+v.errors[0]);
+    if(!FAMS[a.family].train)errs.push('La familia '+a.family+' está documentada, pero su entrenamiento aún no está habilitado (MVP: Feedforward).');
+    else if(v.params>st.maxParams)errs.push('La red tiene '+v.params+' parámetros; el máximo configurado es '+st.maxParams+'.');
+    if(d&&FAMS[a.family].train&&v.ok){
+      const m=d.metadata_json,c=a.config_json,K=m.classes.length;
+      if(c.input[0]!==m.nFeat)errs.push('La entrada de la red ('+c.input[0]+') no coincide con las variables del dataset ('+m.nFeat+').');
+      if(!(c.out===1?K===2:c.out===K))errs.push('La salida de la red ('+c.out+' neuronas) no coincide con las '+K+' clases del dataset.');
+    }
+  }
+  if(!isInt(ep,1,st.maxEpochs))errs.push('Las épocas deben estar entre 1 y '+st.maxEpochs+'.');
+  if(!isInt(bs,1,512))errs.push('El tamaño de lote debe estar entre 1 y 512.');
+  if(!(lr>0&&lr<=1))errs.push('La tasa de aprendizaje debe estar entre 0 y 1.');
+  if(!OPTS[opt])errs.push('Optimizador no reconocido.');
+  if(!isInt(sd,0,999999))errs.push('La semilla debe ser un entero entre 0 y 999999.');
+  if(errs.length)throw E(422,'No se puede iniciar el entrenamiento.',errs);
+  if(DB.training_jobs.filter(j=>j.project_id===pid&&isActive(j)).length>=st.maxActiveJobsPerProject)throw E(409,'El proyecto alcanzó el máximo de '+st.maxActiveJobsPerProject+' entrenamientos activos o en cola.');
+  const id=rid('j'),params={epochs:ep,batch:bs,optimizer:opt,lr,seed:sd};
+  const j={id,project_id:pid,architecture_id:a.id,dataset_id:d.id,status:'QUEUED',progress:0,created_by:u.id,priority:r==='admin'?3:r==='owner'?2:1,created_at:now(),started_at:null,ended_at:null,state_reason:'',
+    params_json:params,snapshot_json:{code_version:'neurolab-web 1.0.0',architecture:{name:a.name,version:a.version,family:a.family,params:pcount,config:clone(a.config_json)},dataset:{name:d.name,version:d.version,rows:d.metadata_json.rows,split:d.metadata_json.split,nFeat:d.metadata_json.nFeat,classes:d.metadata_json.classes},params},
+    result_json:null,notes:'',label:cleanText(f.label,60),retry_of:f.retry_of||null,cancel_requested:false,last_json:{epoch:0},logs_json:[]};
+  jlog(j,'En cola con prioridad '+j.priority+(j.retry_of?' (reintento)':''));
+  DB.training_jobs.push(j);
+  audit('entrenamiento_iniciado',pid,{job:id,arquitectura:a.name,dataset:d.name,epocas:ep});persist();bus.emit({type:'job',id});
+  setTimeout(schedule,0);return id;
+});
+svc.listJobs=def('GET','/api/v1/projects/{id}/training-jobs',async pid=>{need(pid,'read');return DB.training_jobs.filter(j=>j.project_id===pid).sort((a,b)=>b.created_at-a.created_at).map(jobRow);});
+svc.getJob=def('GET','/api/v1/training-jobs/{id}',async jid=>{
+  const j=DB.training_jobs.find(x=>x.id===jid);if(!j)throw E(404,'Trabajo no encontrado.');
+  const{r}=need(j.project_id,'read');
+  return{job:jobRow(j),series:series(jid),role:r};
+});
+svc.cancelJob=def('POST','/api/v1/training-jobs/{id}/cancel',async jid=>{
+  const j=DB.training_jobs.find(x=>x.id===jid);if(!j)throw E(404,'Trabajo no encontrado.');
+  const{u}=need(j.project_id,'cancel');
+  if(TERMINAL.includes(j.status))throw E(409,'El trabajo ya terminó.');
+  j.cancel_requested=true;jlog(j,'Cancelación solicitada por '+u.display_name);
+  audit('entrenamiento_cancelacion_solicitada',j.project_id,{job:jid});persist();bus.emit({type:'job',id:jid});
+  confirmQueuedCancels();
+});
+svc.retryJob=def('POST','/api/v1/training-jobs/{id}/retry',async jid=>{
+  const j=DB.training_jobs.find(x=>x.id===jid);if(!j)throw E(404,'Trabajo no encontrado.');
+  if(j.status!=='FAILED'&&j.status!=='CANCELLED')throw E(409,'Solo se reintentan trabajos fallidos o cancelados.');
+  return svc.createJob(j.project_id,{...j.params_json,architecture_id:j.architecture_id,dataset_id:j.dataset_id,retry_of:jid,label:j.label});
+});
+svc.saveNotes=def('PATCH','/api/v1/training-jobs/{id}',async(jid,text)=>{
+  const j=DB.training_jobs.find(x=>x.id===jid);if(!j)throw E(404,'Trabajo no encontrado.');
+  need(j.project_id,'write');j.notes=cleanText(text,1500);persist();bus.emit({type:'data'});
+});
+
+/* ===== Registro de modelos ===== */
+svc.listVersions=def('GET','/api/v1/projects/{id}/model-versions',async pid=>{need(pid,'read');return DB.model_versions.filter(v=>v.project_id===pid).sort((a,b)=>b.version-a.version);});
+svc.transitionVersion=def('POST','/api/v1/model-versions/{id}/transition',async(vid,to)=>{
+  const v=DB.model_versions.find(x=>x.id===vid);if(!v)throw E(404,'Versión no encontrada.');
+  const{r,u}=need(v.project_id,'read');
+  if(!(MV_NEXT[v.status]||[]).includes(to))throw E(409,'Transición no permitida: '+v.status+' → '+to+'.');
+  if(!canDo(r,MV_MIN[to]==='owner'?'approve':'review'))throw E(403,'Tu rol ('+ROLE_ES[r]+') no permite pasar a «'+to+'».');
+  const old=v.status;v.status=to;
+  audit('modelo_estado',v.project_id,{version:v.version,de:old,a:to});persist();bus.emit({type:'data'});
+});
+svc.exportVersion=def('POST','/api/v1/model-versions/{id}/export',async vid=>{
+  const v=DB.model_versions.find(x=>x.id===vid);if(!v)throw E(404,'Versión no encontrada.');
+  const{r}=need(v.project_id,'export');
+  if(v.status==='borrador'&&!canDo(r,'approve'))throw E(403,'Un borrador solo lo exporta el propietario o el administrador.');
+  const o=DB.objects[v.storage_key];if(!o)throw E(404,'El archivo del modelo no está en el almacén de objetos.');
+  const job=DB.training_jobs.find(j=>j.id===v.job_id),sn=job?job.snapshot_json:null;
+  audit('modelo_exportado',v.project_id,{version:v.version});persist();
+  return JSON.stringify({modelo:{version:v.version,estado:v.status,checksum:v.checksum,meta:v.meta_json},configuracion:sn,pesos:JSON.parse(o.content).weights},null,1)+'\n\n# --- Código Keras equivalente ---\n'+(sn?kerasCode({family:sn.architecture.family,config_json:sn.architecture.config},sn.params):'');
+});
+svc.exportReport=def('POST','/api/v1/projects/{id}/exports',async(pid,kind)=>{
+  const{r}=need(pid,'read');
+  if(kind==='historial'&&!canDo(r,'export'))throw E(403,'Tu rol no permite exportar el historial.');
+  audit('exportacion',pid,{reporte:kind});persist();
+});
+
+/* ===== Administración ===== */
+function adminOnly(){const u=me();if(u.role!=='admin'){audit('acceso_denegado',null,{recurso:'administración'});throw E(403,'Solo el administrador accede a este módulo.');}return u;}
+svc.listUsers=def('GET','/api/v1/admin/users',async()=>{adminOnly();return DB.users.slice();});
+function pwOk(p){p=String(p||'');if(p.length<8||p.length>128)throw E(422,'La contraseña debe tener entre 8 y 128 caracteres.');return p;}
+async function newCred(p){const salt=Array.from(crypto.getRandomValues(new Uint8Array(16))).map(x=>x.toString(16).padStart(2,'0')).join('');return{salt,password_hash:await pwHash(pwOk(p),salt)};}
+svc.createUser=def('POST','/api/v1/admin/users',async f=>{
+  adminOnly();
+  const un=String(f.username||'').trim().toLowerCase(),name=cleanText(f.display_name,80),em=cleanText(f.email,120);
+  if(!/^[a-z0-9._-]{3,32}$/.test(un))throw E(422,'El usuario debe tener de 3 a 32 caracteres: letras, números, punto, guion o guion bajo.');
+  if(!name)throw E(422,'Escribe el nombre a mostrar.');
+  if(DB.users.some(x=>String(x.username||'').toLowerCase()===un))throw E(409,'Ese usuario ya existe.');
+  if(!['admin','user'].includes(f.role))throw E(422,'Rol no válido.');
+  const c=await newCred(f.password);
+  const u={id:rid('u'),username:un,display_name:name,email:em||un+'@neurolab.local',status:'activo',role:f.role,password_hash:c.password_hash,salt:c.salt};
+  DB.users.push(u);audit('usuario_creado',null,{usuario:u.id,username:un,rol:u.role});persist();bus.emit({type:'data'});return u;
+});
+svc.resetPassword=def('PUT','/api/v1/admin/users/{id}/password',async(id,pw)=>{
+  adminOnly();const u=DB.users.find(x=>x.id===id);if(!u)throw E(404,'Usuario no encontrado.');
+  const c=await newCred(pw);u.password_hash=c.password_hash;u.salt=c.salt;
+  audit('contrasena_asignada',null,{usuario:id});persist();return true;
+});
+svc.changePassword=def('PUT','/api/v1/auth/password',async(oldPw,newPw)=>{
+  const u=me();
+  if(!u.password_hash||(await pwHash(String(oldPw||''),u.salt))!==u.password_hash){audit('contrasena_rechazada',null,{});persist();throw E(401,'La contraseña actual no es correcta.');}
+  const c=await newCred(newPw);u.password_hash=c.password_hash;u.salt=c.salt;
+  audit('contrasena_cambiada',null,{});persist();return true;
+});
+svc.setUser=def('PATCH','/api/v1/admin/users/{id}',async(id,f)=>{
+  const a=adminOnly(),u=DB.users.find(x=>x.id===id);if(!u)throw E(404,'Usuario no encontrado.');
+  if(f.role&&!['admin','user'].includes(f.role))throw E(422,'Rol no válido.');
+  if(f.status&&!['activo','suspendido'].includes(f.status))throw E(422,'Estado no válido.');
+  const admins=DB.users.filter(x=>x.role==='admin'&&x.status==='activo');
+  if(u.id===a.id&&((f.role&&f.role!=='admin')||f.status==='suspendido'))throw E(409,'No puedes quitarte el rol ni suspender tu propia cuenta.');
+  if(u.role==='admin'&&admins.length<2&&((f.role&&f.role!=='admin')||f.status==='suspendido'))throw E(409,'Debe quedar al menos un administrador activo.');
+  const before={rol:u.role,estado:u.status};
+  if(f.role)u.role=f.role;if(f.status)u.status=f.status;
+  audit('usuario_cambiado',null,{usuario:id,antes:before,despues:{rol:u.role,estado:u.status}});persist();bus.emit({type:'data'});
+});
+const LIMITS={maxConcurrent:[1,3],maxEpochs:[1,1000],maxParams:[100,500000],maxLayers:[1,50],maxJobSeconds:[10,3600],maxUploadKB:[10,2048],maxDatasetRows:[100,20000],ratePerMin:[1,60],maxActiveJobsPerProject:[1,20],maxDatasetsPerProject:[1,50],memoryMB:[64,4096],cpuPauseMs:[0,1000],retentionDays:[7,3650],quotaKB:[512,4900]};
+svc.saveSettings=def('PUT','/api/v1/admin/settings',async f=>{
+  adminOnly();const errs=[],nv={};
+  Object.keys(LIMITS).forEach(k=>{const v=Math.round(+f[k]);if(!isInt(v,LIMITS[k][0],LIMITS[k][1]))errs.push(k+': valor entre '+LIMITS[k][0]+' y '+LIMITS[k][1]+'.');else nv[k]=v;});
+  if(!['cpu','webgl'].includes(f.backend))errs.push('backend: cpu o webgl.');else nv.backend=f.backend;
+  if(errs.length)throw E(422,'Límites no válidos.',errs);
+  Object.assign(DB.settings,nv);audit('configuracion_cambiada',null,nv);persist();bus.emit({type:'data'});
+});
+svc.applyRetention=def('POST','/api/v1/admin/retention',async()=>{
+  adminOnly();const lim=now()-S().retentionDays*864e5,n0=DB.audit_events.length,m0=DB.training_metrics.length;
+  DB.audit_events=DB.audit_events.filter(e=>e.created_at>=lim);
+  const keep=new Set(DB.training_jobs.filter(j=>(j.ended_at||j.created_at)>=lim).map(j=>j.id));
+  DB.training_metrics=DB.training_metrics.filter(m=>keep.has(m.job_id));
+  const r={auditoria:n0-DB.audit_events.length,metricas:m0-DB.training_metrics.length};
+  audit('retencion_aplicada',null,r);persist();bus.emit({type:'data'});return r;
+});
+svc.importCSV=def('POST','/api/v1/admin/import',async files=>{
+  if(SES)adminOnly();
+  const nd=Object.assign({},DB),loaded=[],ignored=[],warn=[];
+  for(const f of files){
+    const m=f.name.toLowerCase().match(/^([a-z_]+)\.csv$/);
+    if(!m||!TABLES[m[1]]){ignored.push(f.name);continue;}
+    const t=m[1];
+    try{
+      if(t==='settings'){const o=Object.assign({},DEFAULTS);tableFromCSV(t,f.text).forEach(r=>{if(r.key in DEFAULTS){const n=Number(r.value);o[r.key]=isNaN(n)||r.key==='backend'?r.value:n;}});nd.settings=o;}
+      else if(t==='objects'){const o={};tableFromCSV(t,f.text).forEach(r=>{if(r.key)o[r.key]={kind:r.kind,content:r.content};});nd.objects=o;}
+      else nd[t]=tableFromCSV(t,f.text);
+      loaded.push(t+'.csv ('+(t==='settings'||t==='objects'?Object.keys(nd[t]).length:nd[t].length)+')');
+    }catch(e){throw E(422,e.message);}
+  }
+  if(!loaded.length)throw E(422,'No se reconoció ningún archivo. Usa los nombres de tabla (users.csv, projects.csv, …).',ignored);
+  const has=(t,id)=>nd[t].some(x=>x.id===id);
+  nd.project_members.forEach(m=>{if(!has('projects',m.project_id)||!has('users',m.user_id))warn.push('Miembro huérfano: '+m.project_id+'/'+m.user_id);});
+  nd.projects.forEach(p=>{if(!has('users',p.owner_id))warn.push('Proyecto '+p.id+' con propietario inexistente.');});
+  nd.training_jobs.forEach(j=>{if(!has('architectures',j.architecture_id)||!has('datasets',j.dataset_id))warn.push('Trabajo '+j.id+' referencia arquitectura o dataset inexistente.');});
+  nd.datasets.forEach(d=>{if(d.metadata_json&&d.metadata_json.source==='csv'&&!nd.objects[d.storage_key])warn.push('Dataset '+d.id+' sin archivo en objects.csv.');});
+  if(!nd.users.some(u=>u.role==='admin'&&u.status==='activo'&&u.username&&u.password_hash&&u.salt))throw E(422,'users.csv debe incluir al menos un administrador activo con usuario y contraseña (así no te quedas sin acceso).');
+  if(new Set(nd.users.map(u=>String(u.username||'').toLowerCase()).filter(Boolean)).size!==nd.users.filter(u=>u.username).length)throw E(422,'users.csv tiene nombres de usuario repetidos.');
+  DB=nd;DB._rev=(DB._rev||0)+1;
+  Object.keys(ROWC).forEach(k=>delete ROWC[k]);
+  if(SES&&!DB.users.find(u=>u.id===SES&&u.status==='activo')){SES=null;try{sessionStorage.removeItem(LSS);}catch(e){}}
+  recoverJobs();audit('importacion_csv',null,{archivos:loaded.length});persist();DB._exported=DB._rev;bus.emit({type:'data'});
+  return{loaded,ignored,warn:warn.slice(0,12),warnTotal:warn.length};
+});
+
+/* ===== Worker de entrenamiento (hilo principal, con cola y estados persistidos) ===== */
+function schedule(){
+  if(NOSCHED)return;
+  confirmQueuedCancels();
+  let active=DB.training_jobs.filter(j=>j.status==='PREPARING'||j.status==='RUNNING').length;
+  const q=DB.training_jobs.filter(j=>j.status==='QUEUED').sort((a,b)=>b.priority-a.priority||a.created_at-b.created_at);
+  while(active<S().maxConcurrent&&q.length){active++;runJob(q.shift());}
+}
+function recoverJobs(){
+  DB.training_jobs.forEach(j=>{if((j.status==='PREPARING'||j.status==='RUNNING')&&!RUNNING[j.id])transition(j,'FAILED','Worker interrumpido: la página se cerró o recargó durante el entrenamiento. Se conservaron el estado y las métricas ya registradas.');});
+}
+function buildModel(cfg,seedN,lr,opt){
+  const tf=window.tf,m=tf.sequential();let first=true,i=0;
+  const ini=()=>({kernelInitializer:tf.initializers.glorotUniform({seed:seedN+(i++)}),...(first?{inputShape:[cfg.input[0]]}:{})});
+  cfg.layers.forEach(l=>{
+    if(l.type==='dense')m.add(tf.layers.dense({units:l.units,activation:l.act,...ini()}));
+    else m.add(tf.layers.dropout({rate:l.rate,...(first?{inputShape:[cfg.input[0]]}:{})}));
+    first=false;
+  });
+  const n=cfg.out;
+  m.add(tf.layers.dense({units:n,activation:n===1?'sigmoid':'softmax',...ini()}));
+  m.compile({optimizer:tf.train[opt](lr),loss:n===1?'binaryCrossentropy':'categoricalCrossentropy',metrics:['accuracy']});
+  return m;
+}
+const argmax=a=>{let b=0;for(let i=1;i<a.length;i++)if(a[i]>a[b])b=i;return b;};
+async function runJob(j){
+  RUNNING[j.id]=true;const t0=now(),st=S();let model=null,T=null,stopWhy='';
+  try{
+    transition(j,'PREPARING');
+    if(typeof window.tf==='undefined')throw new Error('TensorFlow.js no está disponible (no se pudo cargar desde la red).');
+    await window.tf.ready();
+    const tf=window.tf;
+    if(st.backend!==tf.getBackend()){try{await tf.setBackend(st.backend);}catch(e){jlog(j,'Backend '+st.backend+' no disponible; se usa '+tf.getBackend());}}
+    const ds=DB.datasets.find(x=>x.id===j.dataset_id),sn=j.snapshot_json,P=j.params_json;
+    if(!ds)throw new Error('El dataset ya no existe.');
+    const rows=getRows(ds),n=rows.X.length,sp=splitIdx(n,P.seed,sn.dataset.split),nf=rows.X[0].length,K=rows.classes.length,out=sn.architecture.config.out;
+    const mean=[],sd=[];
+    for(let f=0;f<nf;f++){let m=0;sp.tr.forEach(k=>{m+=rows.X[k][f];});m/=sp.tr.length;let v=0;sp.tr.forEach(k=>{v+=Math.pow(rows.X[k][f]-m,2);});mean.push(m);sd.push(Math.sqrt(v/sp.tr.length)||1);}
+    const Z=rows.X.map(r=>r.map((v,k)=>(v-mean[k])/sd[k]));
+    const yT=ids=>out===1?tf.tensor2d(ids.map(k=>[rows.y[k]])):tf.oneHot(tf.tensor1d(ids.map(k=>rows.y[k]),'int32'),K).cast('float32');
+    const mk=ids=>({x:tf.tensor2d(ids.map(k=>Z[k])),y:yT(ids)});
+    const a=mk(sp.tr),b=mk(sp.va),c=mk(sp.te);T=[a.x,a.y,b.x,b.y,c.x,c.y];
+    model=buildModel(sn.architecture.config,P.seed,P.lr,P.optimizer);
+    jlog(j,'Modelo construido ('+sn.architecture.params+' parámetros). Semilla '+P.seed+'.');
+    if(j.cancel_requested){transition(j,'CANCELLED','Cancelado por solicitud del usuario antes de entrenar (confirmado por el worker).');return;}
+    transition(j,'RUNNING');
+    const E_=P.epochs;
+    await model.fit(a.x,a.y,{epochs:E_,batchSize:P.batch,validationData:[b.x,b.y],shuffle:true,callbacks:{onEpochEnd:async(ep,logs)=>{
+      const m={loss:logs.loss,accuracy:logs.acc!=null?logs.acc:logs.accuracy,val_loss:logs.val_loss,val_accuracy:logs.val_acc!=null?logs.val_acc:logs.val_accuracy};
+      Object.keys(m).forEach(k=>DB.training_metrics.push({id:j.id+'-'+(ep+1)+'-'+k,job_id:j.id,epoch:ep+1,metric_name:k,metric_value:+m[k].toFixed(6),recorded_at:now()}));
+      j.progress=Math.round((ep+1)/E_*100);j.last_json={epoch:ep+1,loss:m.loss,acc:m.accuracy,val_loss:m.val_loss,val_acc:m.val_accuracy};
+      if(ep%3===0||ep===E_-1)LIVEW[j.id]=model.getWeights().map(w=>({shape:w.shape,data:Array.from(w.dataSync())}));
+      persist();bus.emit({type:'job',id:j.id});
+      if(j.cancel_requested){model.stopTraining=true;stopWhy='cancel';}
+      else if(now()-t0>st.maxJobSeconds*1000){model.stopTraining=true;stopWhy='time';}
+      else if(tf.memory().numBytes>st.memoryMB*1048576){model.stopTraining=true;stopWhy='mem';}
+      if(st.cpuPauseMs>0)await new Promise(r=>setTimeout(r,st.cpuPauseMs));else await tf.nextFrame();
+    }}});
+    if(stopWhy==='cancel'){transition(j,'CANCELLED','Cancelado por solicitud del usuario; el worker confirmó la parada en la época '+j.last_json.epoch+'.');return;}
+    if(stopWhy==='time'){transition(j,'FAILED','Duración máxima excedida ('+st.maxJobSeconds+' s).');return;}
+    if(stopWhy==='mem'){transition(j,'FAILED','Límite de memoria excedido ('+st.memoryMB+' MB).');return;}
+    const ev=model.evaluate(c.x,c.y,{batchSize:256}),teLoss=(await ev[0].data())[0],teAcc=(await ev[1].data())[0];tf.dispose(ev);
+    const P2=model.predict(c.x).arraySync(),cm=Array.from({length:K},()=>new Array(K).fill(0));
+    sp.te.forEach((idx,i)=>{const pr=out===1?(P2[i][0]>0.5?1:0):argmax(P2[i]);cm[rows.y[idx]][pr]++;});
+    const s=series(j.id),L=s.accuracy.length-1,weights=model.getWeights().map(w=>({shape:w.shape,data:Array.from(w.dataSync()).map(v=>+v.toFixed(5))}));
+    LIVEW[j.id]=weights;
+    const json=JSON.stringify({weights});
+    if(usageKB()+json.length/1024>st.quotaKB)throw new Error('Cuota de almacenamiento agotada ('+st.quotaKB+' KB): no se pudo guardar el modelo. Libera espacio o aumenta el límite.');
+    const vid=rid('mv'),ver=Math.max(0,...DB.model_versions.filter(v=>v.project_id===j.project_id).map(v=>v.version))+1;
+    DB.objects['model_'+vid]={kind:'model',content:json};
+    j.result_json={trAcc:s.accuracy[L],vaAcc:s.val_accuracy[L],teAcc,teLoss,cm,params:sn.architecture.params,duration_ms:now()-t0,epochs_done:L+1,classes:rows.classes};
+    DB.model_versions.push({id:vid,project_id:j.project_id,job_id:j.id,version:ver,storage_key:'model_'+vid,status:'borrador',checksum:await sha256(json),created_at:now(),created_by:j.created_by,
+      meta_json:{arch:sn.architecture.name+' v'+sn.architecture.version,dataset:sn.dataset.name+' v'+sn.dataset.version,params:sn.architecture.params,test_acc:teAcc,test_loss:teLoss,epochs:P.epochs,optimizer:P.optimizer,lr:P.lr,seed:P.seed}});
+    audit('modelo_creado',j.project_id,{version:ver,job:j.id},'worker');
+    transition(j,'COMPLETED','Entrenamiento finalizado. Versión '+ver+' registrada como borrador.');
+  }catch(e){
+    console.error(e);
+    if(!TERMINAL.includes(j.status)){j.tech_note=String(e&&e.stack||e).slice(0,400);transition(j,'FAILED',(e&&e.message)?e.message:'Error durante el entrenamiento.');}
+  }finally{
+    if(T&&window.tf)window.tf.dispose(T);if(model){try{model.dispose();}catch(e){}}
+    delete RUNNING[j.id];schedule();
+  }
+}
+
+/* ===== Interfaz: estado, shell y utilidades ===== */
+const U={view:'dashboard',pid:null,open:false,ptab:'contexto',proj:null,draft:null,sel:-1,side:'generator',jobSel:null,cmp:[],rep:'ficha',adm:'usuarios',cfg:'importar',lu:'',flash:null,imp:null,arch3d:true,confirm:null,pending:null};
+const A={},F={},B={},V={};
+let RID=0,LIVE=null;
+const MODS=[['M01','dashboard','Inicio'],['M02','proyectos','Proyectos de IA'],['M03','fundamentos','Fundamentos neuronales'],['M04','arquitecturas','Diseñador de arquitecturas'],['M05','datasets','Datasets'],['M06','entrenamientos','Entrenamientos'],['M07','evaluacion','Evaluación y métricas'],['M08','modelos','Registro de modelos'],['M09','reportes','Reportes'],['M10','admin','Administración y seguridad'],['CFG','config','Configuración']];
+const PTABS=[['contexto','Contexto'],['arquitecturas','Arquitectura'],['datasets','Dataset'],['entrenamientos','Entrenamientos'],['modelos','Modelos'],['historial','Historial']];
+const modName=k=>(MODS.find(m=>m[1]===k)||[0,0,k])[2];
+const can=a=>!!(U.proj&&canDo(U.proj.role,a));
+const pill=s=>'<span class="pill '+esc(s)+'">'+esc(STATE_ES[s]||s)+'</span>';
+const bar=v=>'<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+(v||0)+'"><i style="width:'+(v||0)+'%"></i></div>';
+const tbl=(heads,rows,cls)=>'<div class="scroll"><table class="t '+(cls||'')+'"><thead><tr>'+heads.map(h=>'<th'+(h[0]==='#'?' class="n"':'')+'>'+esc(h.replace(/^#/,''))+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';
+const empty=(t,d,a)=>'<div class="empty"><h3>'+esc(t)+'</h3><p>'+d+'</p>'+(a||'')+'</div>';
+const head=(t,d,extra)=>'<div class="pagehead"><div><h1>'+esc(t)+'</h1>'+(d?'<p>'+d+'</p>':'')+'</div>'+(extra?'<div class="row">'+extra+'</div>':'')+'</div>';
+const flashHTML=()=>{const f=U.flash;if(!f)return '';return '<div class="banner '+(f.k||'ok')+'" role="status">'+esc(f.m)+(f.d&&f.d.length?'<ul>'+f.d.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+'</div>';};
+const setFlash=(m,k,d)=>{U.flash={m,k:k||'ok',d};};
+async function guard(fn){
+  try{await fn();}
+  catch(e){if(e instanceof HttpError)setFlash(e.message,'bad',e.details);else{console.error(e);setFlash('Ocurrió un error inesperado.','bad');}render();}
+}
+function logoSVG(sz){return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 40 40" aria-hidden="true"><g stroke="currentColor" stroke-width="1.5" opacity=".5"><line x1="8" y1="12" x2="20" y2="8"/><line x1="8" y1="12" x2="20" y2="20"/><line x1="8" y1="28" x2="20" y2="20"/><line x1="8" y1="28" x2="20" y2="32"/><line x1="20" y1="8" x2="32" y2="20"/><line x1="20" y1="20" x2="32" y2="20"/><line x1="20" y1="32" x2="32" y2="20"/></g><g fill="currentColor"><circle cx="8" cy="12" r="3.5"/><circle cx="8" cy="28" r="3.5"/><circle cx="20" cy="8" r="3.5"/><circle cx="20" cy="20" r="3.5"/><circle cx="20" cy="32" r="3.5"/><circle cx="32" cy="20" r="4.5"/></g></svg>';}
+async function readFiles(input){return Promise.all(Array.from(input.files||[]).map(async f=>({name:f.name,size:f.size,type:f.type,text:await f.text()})));}
+
+function loginHTML(){
+  return '<div class="page" style="max-width:440px;margin:0 auto;padding-top:48px"><div class="row" style="gap:12px;color:var(--accent);margin-bottom:18px">'+logoSVG(44)+'<div style="color:var(--fg)"><h1 style="font-size:26px">NeuroLab Enterprise</h1><div class="muted">Diseña, entrena y evalúa redes neuronales.</div></div></div>'
+  +'<section class="panel"><div class="ph"><h2>Ingresar</h2></div><form data-form="login" autocomplete="on"><div class="fields" style="grid-template-columns:1fr">'
+  +'<label class="f" for="lg-u">Usuario<input id="lg-u" name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" required maxlength="64" value="'+esc(U.lu||'')+'"></label>'
+  +'<label class="f" for="lg-p">Contraseña<input id="lg-p" name="password" type="password" autocomplete="current-password" required maxlength="128"></label></div>'
+  +'<div class="row" style="margin-top:12px"><button class="btn primary" type="submit">Ingresar</button></div></form>'
+  +'<p class="hint" style="margin-top:14px">Después de ingresar, carga tus tablas CSV en <b>Configuración → Importar CSV</b>. Sin base de datos: cada tabla es un archivo CSV.</p></section></div>';
+}
+function shellHTML(){
+  return '<div class="app" id="app"><nav class="nav" id="nav" aria-label="Módulos"><div class="brand">'+logoSVG(26)+'NeuroLab</div>'
+  +MODS.map(m=>'<button type="button" data-act="nav" data-v="'+m[1]+'"'+(m[1]==='admin'?' data-admin="1"':'')+'><span class="mid">'+m[0]+'</span>'+esc(m[2])+'</button>').join('')
+  +'<div class="sp"></div><div class="small">Datos en CSV · sin base de datos</div></nav><div class="scrim" data-act="menu"></div>'
+  +'<div class="main"><header class="top"><div class="topin"><div class="row"><button class="btn sm menu" data-act="menu" aria-label="Abrir menú">☰ Menú</button><div class="crumbs" id="crumbs" aria-label="Migas de pan"></div></div><div class="tools" id="tools"></div></div></header><main class="page" id="content" tabindex="-1"></main></div></div>';
+}
+async function header(){
+  const u=me(),ps=await svc.listProjects();
+  const rtc='<span class="chip'+(bus.rt?'':' off')+'" title="Canal de eventos en tiempo real"><span class="d"></span>'+(bus.rt?'Tiempo real':'Sin conexión')+'</span>';
+  const dirty=u.role==='admin'&&isDirty()?'<button class="chip" data-act="goData" title="Hay cambios que aún no se exportaron a CSV" style="cursor:pointer;color:var(--warn)">● CSV sin exportar</button>':'';
+  const sel='<label class="sr" style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)">Proyecto<select id="ctxProj" data-bind="ctx" style="width:auto;max-width:200px"><option value="">— ninguno —</option>'+ps.map(p=>'<option value="'+esc(p.id)+'"'+(p.id===U.pid?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select></label>';
+  g('tools').innerHTML=sel+rtc+dirty+'<span class="chip" title="'+esc(u.email)+'">'+esc(u.display_name)+' · '+(u.role==='admin'?'Administrador':'Usuario')+'</span><button class="btn sm" data-act="logout">Salir</button>';
+  const pj=ps.find(p=>p.id===U.pid),pro=['arquitecturas','datasets','entrenamientos','evaluacion','modelos','reportes'].includes(U.view)||(U.view==='proyectos'&&U.open);
+  let c='<span>NeuroLab</span> › '+(pro&&pj?'<span>'+esc(pj.name)+'</span> › ':'')+'<b>'+esc(U.view==='proyectos'&&U.open?(PTABS.find(t=>t[0]===U.ptab)||[0,'Contexto'])[1]:modName(U.view))+'</b>';
+  g('crumbs').innerHTML=c;
+  $$nav(u);
+}
+function $$nav(u){Array.from(document.querySelectorAll('#nav button[data-v]')).forEach(b=>{if(b.dataset.v===U.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');if(b.dataset.admin)b.style.display=u.role==='admin'?'':'none';});}
+async function loadProj(){
+  if(!U.pid){U.proj=null;return;}
+  try{U.proj=await svc.getProject(U.pid);}catch(e){U.pid=null;U.proj=null;U.open=false;}
+}
+async function render(){
+  const my=++RID;
+  if(!SES){g('root').innerHTML=flashHTML()+loginHTML();U.flash=null;return;}
+  if(!g('content'))g('root').innerHTML=shellHTML();
+  LIVE=null;
+  let out;
+  try{
+    await header();await loadProj();
+    out=await V[U.view]();
+  }catch(e){
+    if(e instanceof HttpError&&e.status===401){SES=null;return render();}
+    out={h:'<div class="banner bad">'+esc(e instanceof HttpError?e.message:'No se pudo mostrar este módulo.')+'</div>'};if(!(e instanceof HttpError))console.error(e);
+  }
+  if(my!==RID)return;
+  const c=g('content');c.innerHTML=flashHTML()+out.h;U.flash=null;
+  if(out.f)out.f();
+  g('app').classList.remove('open');
+}
+function go(view){U.view=view;if(view==='proyectos')U.open=false;U.confirm=null;try{if(location.hash!=='#'+view)history.replaceState(null,'','#'+view);}catch(e){}render();}
+function needProject(title){
+  return {h:head(title)+empty('Selecciona un proyecto','Este módulo trabaja sobre un proyecto. Elige uno en el selector de la parte superior o abre la lista.','<p><button class="btn primary" data-act="nav" data-v="proyectos">Ver proyectos</button></p>')};
+}
+function embed(view){return V[view]();}
+
+/* ===== M01 Dashboard ===== */
+function demoTarget(){
+  const u=me();
+  for(const p of visible(u)){
+    if(!canDo(roleOf(p,u),'write'))continue;
+    for(const a of DB.architectures.filter(x=>x.project_id===p.id&&x.family==='Feedforward')){
+      const d=DB.datasets.find(x=>x.project_id===p.id&&x.metadata_json.nFeat===a.config_json.input[0]&&(a.config_json.out===1?x.metadata_json.classes.length===2:x.metadata_json.classes.length===a.config_json.out));
+      if(d)return{pid:p.id,a,d};
+    }
+  }
+  return null;
+}
+V.dashboard=async()=>{
+  const ps=await svc.listProjects(),ids=new Set(ps.map(p=>p.id));
+  const jobs=DB.training_jobs.filter(j=>ids.has(j.project_id)).sort((a,b)=>b.created_at-a.created_at).map(jobRow);
+  const cnt={};jobs.forEach(j=>{cnt[j.status]=(cnt[j.status]||0)+1;});
+  const vers=DB.model_versions.filter(v=>ids.has(v.project_id)),act=(cnt.RUNNING||0)+(cnt.PREPARING||0),q=cnt.QUEUED||0;
+  const failed=jobs.filter(j=>j.status==='FAILED'&&now()-j.ended_at<864e5);
+  const alerts=[];
+  failed.forEach(j=>alerts.push(['bad','Entrenamiento '+j.no+' falló: '+j.state_reason]));
+  if(q&&!act)alerts.push(['warn',q+' entrenamiento(s) en cola sin worker activo.']);
+  const rev=vers.filter(v=>v.status==='revisado').length;if(rev)alerts.push(['warn',rev+' modelo(s) revisado(s) esperan aprobación.']);
+  if(usageKB()>S().quotaKB*0.8)alerts.push(['warn','El almacén usa '+usageKB()+' de '+S().quotaKB+' KB.']);
+  if(typeof window.tf==='undefined')alerts.push(['bad','TensorFlow.js no se cargó: no se puede entrenar sin conexión al CDN.']);
+  let tfv='No cargado',be='';
+  if(typeof window.tf!=='undefined'){tfv='v'+((window.tf.version&&window.tf.version.tfjs)||'?');try{be=window.tf.getBackend()||'';}catch(e){}}
+  const dt=demoTarget();
+  const body=head('Inicio','Resumen de tus proyectos, entrenamientos y del estado del sistema.')
+  +'<div class="cards"><div class="card"><span>Proyectos</span><b>'+ps.length+'</b><small>accesibles para ti</small></div><div class="card"><span>Entrenamientos activos</span><b>'+act+'</b><small>'+q+' en cola</small></div><div class="card"><span>Modelos</span><b>'+vers.length+'</b><small>'+vers.filter(v=>v.status==='aprobado').length+' aprobados</small></div><div class="card"><span>Alertas</span><b>'+alerts.length+'</b><small>requieren atención</small></div></div>'
+  +'<section class="panel"><div class="ph"><h2>Entrenamientos recientes</h2>'+(dt&&!jobs.length?'<button class="btn primary" data-act="demo">Entrenar demostración reproducible</button>':'')+'</div>'
+  +(jobs.length?tbl(['Entrenamiento','Proyecto','Arquitectura','Estado','Progreso','#Exact. val.','Inicio',''],jobs.slice(0,8).map(j=>'<tr><td class="mono">'+esc(j.no)+(j.label?' <span class="muted">'+esc(j.label)+'</span>':'')+'</td><td>'+esc(j.project)+'</td><td>'+esc(j.arch)+'</td><td>'+pill(j.status)+'</td><td style="min-width:110px">'+bar(j.progress)+'</td><td class="n mono">'+pct(j.last_json&&j.last_json.val_acc)+'</td><td class="mono">'+fmtDT(j.started_at||j.created_at)+'</td><td><button class="btn sm" data-act="openJob" data-id="'+esc(j.id)+'" data-p="'+esc(j.project_id)+'">Ver</button></td></tr>'))
+    :empty('Aún no hay entrenamientos','Aquí aparecerán el estado y el avance de cada entrenamiento. Crea uno en M06 o ejecuta la demostración reproducible (semilla 42).',dt?'<p><button class="btn primary" data-act="demo">Entrenar demostración reproducible</button></p>':''))+'</section>'
+  +'<div class="g2"><section class="panel"><div class="ph"><h2>Estado del sistema</h2></div><dl class="kv"><dt>Worker</dt><dd>'+act+' activo(s) · máximo '+S().maxConcurrent+'</dd><dt>Cola</dt><dd>'+q+' trabajo(s)</dd><dt>Canal de eventos</dt><dd>'+(bus.rt?'Conectado (pub/sub)':'Desconectado')+'</dd><dt>TensorFlow.js</dt><dd>'+esc(tfv)+(be?' · '+esc(be):'')+'</dd><dt>Almacén de objetos</dt><dd>'+usageKB()+' / '+S().quotaKB+' KB</dd><dt>Datos CSV</dt><dd>'+(isDirty()?'cambios sin exportar':'al día')+'</dd></dl></section>'
+  +'<section class="panel"><div class="ph"><h2>Alertas e indicadores</h2></div>'+(alerts.length?alerts.map(a=>'<div class="banner '+a[0]+'">'+esc(a[1])+'</div>').join(''):'<div class="banner ok">Sin alertas.</div>')
+  +'<h3 style="margin:8px 0">Entrenamientos por estado</h3>'+Object.keys(STATE_ES).map(s=>'<div class="row" style="margin-bottom:4px"><span style="width:100px">'+pill(s)+'</span><div style="flex:1;min-width:80px">'+bar(jobs.length?Math.round((cnt[s]||0)/jobs.length*100):0)+'</div><span class="mono">'+(cnt[s]||0)+'</span></div>').join('')+'</section></div>';
+  LIVE=()=>{if(U.view==='dashboard')render();};
+  return{h:body};
+};
+A.demo=el=>guard(async()=>{
+  const t=demoTarget();if(!t)throw E(409,'No hay una arquitectura y un dataset compatibles donde puedas entrenar.');
+  const id=await svc.createJob(t.pid,{architecture_id:t.a.id,dataset_id:t.d.id,epochs:60,batch:32,optimizer:'adam',lr:0.01,seed:42,label:'Demostración'});
+  U.pid=t.pid;U.jobSel=id;setFlash('Demostración en cola. Puedes seguirla en vivo en Entrenamientos.');go('entrenamientos');
+});
+A.openJob=el=>{U.pid=el.dataset.p;U.jobSel=el.dataset.id;go('entrenamientos');};
+
+/* ===== M02 Proyectos ===== */
+V.proyectos=async()=>{
+  if(U.open&&U.pid){
+    await loadProj();
+    if(U.proj){
+      const tabs='<div class="tabs" role="tablist">'+PTABS.map(t=>'<button class="tab" role="tab" aria-selected="'+(U.ptab===t[0])+'" data-act="ptab" data-t="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>';
+      let inner;
+      if(U.ptab==='contexto')inner=await projContext();
+      else if(U.ptab==='historial')inner=await V.hist();
+      else inner=await V[U.ptab]();
+      return{h:head(U.proj.p.name,esc(U.proj.p.description||'Sin descripción.'),'<span class="chip">Tu rol: '+ROLE_ES[U.proj.role]+'</span><button class="btn sm" data-act="closeProject">← Todos los proyectos</button>')+tabs+inner.h,f:inner.f};
+    }
+  }
+  const q=U.q||'',st=U.pst||'';
+  const ps=await svc.listProjects({q,status:st});
+  const h=head('Proyectos de IA','Cada proyecto agrupa arquitecturas, datasets, entrenamientos y modelos, con sus propios miembros.','<button class="btn primary" data-act="toggleNew">Nuevo proyecto</button>')
+  +(U.newProj?'<section class="panel"><div class="ph"><h2>Nuevo proyecto</h2></div><form data-form="newProject"><div class="fields"><label class="f" for="np-name">Nombre<input type="text" id="np-name" name="name" required maxlength="80"></label><label class="f" for="np-tags">Etiquetas (separadas por coma)<input type="text" id="np-tags" name="tags" placeholder="demo, sensores"></label></div><label class="f" for="np-desc" style="margin-bottom:12px">Descripción<textarea id="np-desc" name="description" maxlength="400"></textarea></label><div class="row"><button class="btn primary" type="submit">Crear proyecto</button><button class="btn" type="button" data-act="toggleNew">Cancelar</button></div></form></section>':'')
+  +'<section class="panel"><div class="fields" style="margin-bottom:8px"><label class="f" for="pq">Buscar<input type="search" id="pq" data-bind="pq" value="'+esc(q)+'" placeholder="Nombre, descripción o etiqueta"></label><label class="f" for="pst">Estado<select id="pst" data-bind="pst"><option value="">Todos</option><option value="activo"'+(st==='activo'?' selected':'')+'>Activo</option><option value="archivado"'+(st==='archivado'?' selected':'')+'>Archivado</option></select></label></div>'
+  +(ps.length?tbl(['Proyecto','Estado','Tu rol','#Miembros','#Entrenamientos','Etiquetas','Actualizado',''],ps.map(p=>'<tr><td><b>'+esc(p.name)+'</b><div class="muted" style="font-size:12px">'+esc(p.description.slice(0,90))+'</div></td><td>'+pill(p.status)+'</td><td>'+ROLE_ES[p.role]+'</td><td class="n">'+p.members+'</td><td class="n">'+p.jobs+'</td><td>'+p.tags.map(t=>'<span class="chip" style="margin-right:4px">'+esc(t)+'</span>').join('')+'</td><td class="mono">'+fmtDT(p.updated_at)+'</td><td><button class="btn sm" data-act="openProject" data-id="'+esc(p.id)+'">Abrir</button></td></tr>'))
+   :empty('Sin proyectos','No hay proyectos que coincidan. Crea uno nuevo o cambia los filtros.'))+'</section>';
+  return{h};
+};
+async function projContext(){
+  const{p,role,members}=U.proj,own=canDo(role,'manage'),cand=DB.users.filter(u=>u.status==='activo'&&!members.some(m=>m.user_id===u.id));
+  const h='<div class="g2"><section class="panel"><div class="ph"><h2>Contexto</h2>'+pill(p.status)+'</div><dl class="kv"><dt>Propietario</dt><dd>'+esc(uname(p.owner_id))+'</dd><dt>Creado</dt><dd>'+fmtDT(p.created_at)+'</dd><dt>Etiquetas</dt><dd>'+(p.tags.length?p.tags.map(t=>'<span class="chip" style="margin-right:4px">'+esc(t)+'</span>').join(''):'—')+'</dd><dt>Arquitecturas</dt><dd>'+DB.architectures.filter(a=>a.project_id===p.id).length+'</dd><dt>Datasets</dt><dd>'+DB.datasets.filter(a=>a.project_id===p.id).length+'</dd><dt>Entrenamientos</dt><dd>'+DB.training_jobs.filter(a=>a.project_id===p.id).length+'</dd><dt>Modelos</dt><dd>'+DB.model_versions.filter(a=>a.project_id===p.id).length+'</dd></dl>'
+  +'<h3 style="margin:14px 0 6px">Documentación</h3><pre class="code" style="white-space:pre-wrap;max-height:200px">'+esc(p.doc||'Sin documentación.')+'</pre></section>'
+  +'<section class="panel"><div class="ph"><h2>Editar proyecto</h2></div>'+(own?'<form data-form="editProject"><div class="fields"><label class="f" for="ep-name">Nombre<input type="text" id="ep-name" name="name" value="'+esc(p.name)+'" maxlength="80"></label><label class="f" for="ep-st">Estado<select id="ep-st" name="status"><option value="activo"'+(p.status==='activo'?' selected':'')+'>Activo</option><option value="archivado"'+(p.status==='archivado'?' selected':'')+'>Archivado</option></select></label></div><label class="f" for="ep-tags" style="margin-bottom:12px">Etiquetas<input type="text" id="ep-tags" name="tags" value="'+esc(p.tags.join(', '))+'"></label><label class="f" for="ep-desc" style="margin-bottom:12px">Descripción<textarea id="ep-desc" name="description">'+esc(p.description)+'</textarea></label><label class="f" for="ep-doc" style="margin-bottom:12px">Documentación<textarea id="ep-doc" name="doc" style="min-height:110px">'+esc(p.doc)+'</textarea></label><button class="btn primary" type="submit">Guardar cambios</button></form>':'<p class="hint">Solo el propietario o el administrador edita el proyecto.</p>')+'</section></div>'
+  +'<section class="panel"><div class="ph"><h2>Miembros y permisos</h2></div>'+tbl(['Usuario','Correo','Rol',''],members.map(m=>'<tr><td>'+esc(m.name)+'</td><td class="mono">'+esc(m.email)+'</td><td>'+(own?'<select data-bind="mrole" data-uid="'+esc(m.user_id)+'" aria-label="Rol de '+esc(m.name)+'" style="width:auto"><option value="owner"'+(m.role==='owner'?' selected':'')+'>Propietario</option><option value="editor"'+(m.role==='editor'?' selected':'')+'>Editor</option><option value="viewer"'+(m.role==='viewer'?' selected':'')+'>Lector</option></select>':ROLE_ES[m.role])+'</td><td>'+(own?'<button class="btn sm danger" data-act="rmMember" data-uid="'+esc(m.user_id)+'">Quitar</button>':'')+'</td></tr>'))
+  +(own&&cand.length?'<form data-form="addMember" class="row" style="margin-top:12px"><label class="f" for="am-u" style="min-width:200px">Agregar usuario<select id="am-u" name="uid">'+cand.map(u=>'<option value="'+esc(u.id)+'">'+esc(u.display_name)+'</option>').join('')+'</select></label><label class="f" for="am-r">Rol<select id="am-r" name="role"><option value="editor">Editor</option><option value="viewer">Lector</option><option value="owner">Propietario</option></select></label><button class="btn" type="submit" style="align-self:flex-end">Agregar</button></form>':'')+'</section>';
+  return{h};
+}
+V.hist=async()=>{
+  if(!U.pid)return needProject('Historial');
+  const jobs=await svc.listJobs(U.pid);
+  const h='<section class="panel"><div class="ph"><h2>Historial de entrenamiento</h2></div>'+(jobs.length?tbl(['Entrenamiento','Fecha','Duración','Estado','Parámetros principales','Dataset','Acciones'],jobs.map(j=>{const p=j.params_json;return '<tr><td class="mono">'+esc(j.no)+(j.retry_of?' <span class="muted">↻ '+esc(sid(j.retry_of))+'</span>':'')+'<div class="muted">'+esc(j.arch)+'</div></td><td class="mono">'+fmtDT(j.created_at)+'</td><td class="mono">'+fmtDur(j.dur)+'</td><td>'+pill(j.status)+'</td><td class="mono" style="font-size:11px">'+esc(OPTS[p.optimizer])+' lr '+p.lr+' · '+p.epochs+' ép. · lote '+p.batch+' · semilla '+p.seed+'</td><td>'+esc(j.dataset)+'</td><td><div class="row"><button class="btn sm" data-act="openJob" data-id="'+esc(j.id)+'" data-p="'+esc(j.project_id)+'">Ver</button>'+((j.status==='FAILED'||j.status==='CANCELLED')&&can('write')?'<button class="btn sm" data-act="retry" data-id="'+esc(j.id)+'">Reintentar</button>':'')+'</div></td></tr>';}))
+   :empty('Sin historial','Los entrenamientos del proyecto aparecerán aquí con fecha, duración, estado y parámetros.'))+'</section>';
+  return{h};
+};
+A.openProject=el=>{U.pid=el.dataset.id;U.open=true;U.ptab='contexto';U.view='proyectos';render();};
+A.closeProject=()=>{U.open=false;render();};
+A.ptab=el=>{U.ptab=el.dataset.t;render();};
+A.toggleNew=()=>{U.newProj=!U.newProj;render();};
+A.rmMember=el=>guard(async()=>{await svc.removeMember(U.pid,el.dataset.uid);setFlash('Miembro quitado.');render();});
+A.retry=el=>guard(async()=>{const id=await svc.retryJob(el.dataset.id);U.jobSel=id;setFlash('Reintento en cola.');go('entrenamientos');});
+F.newProject=f=>guard(async()=>{const id=await svc.createProject({name:f.name.value,description:f.description.value,tags:f.tags.value});U.newProj=false;U.pid=id;U.open=true;U.ptab='contexto';setFlash('Proyecto creado. Agrega arquitecturas y datasets para empezar.');render();});
+F.editProject=f=>guard(async()=>{await svc.updateProject(U.pid,{name:f.name.value,description:f.description.value,tags:f.tags.value,doc:f.doc.value,status:f.status.value});setFlash('Proyecto actualizado.');render();});
+F.addMember=f=>guard(async()=>{await svc.addMember(U.pid,f.uid.value,f.role.value);setFlash('Miembro agregado.');render();});
+B.mrole=el=>guard(async()=>{await svc.setMember(U.pid,el.dataset.uid,el.value);setFlash('Rol actualizado.');render();});
+B.ctx=el=>{U.pid=el.value||null;U.jobSel=null;U.draft=null;U.sel=-1;if(!U.pid)U.open=false;render();};
+let qt_=0;
+B.pq=el=>{U.q=el.value;clearTimeout(qt_);qt_=setTimeout(()=>{render().then(()=>{const i=g('pq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}});},250);};
+B.pst=el=>{U.pst=el.value;render();};
+A.nav=el=>go(el.dataset.v);
+A.menu=()=>g('app').classList.toggle('open');
+A.goData=()=>{U.cfg='exportar';go('config');};
+F.login=f=>guard(async()=>{U.lu=f.username.value;const u=await svc.login(f.username.value,f.password.value);f.password.value='';U.view='dashboard';U.open=false;U.imp=null;const ps=await svc.listProjects();U.pid=ps.length?ps[0].id:null;if(u.role==='admin')setFlash('Sesión iniciada. Para cargar tus CSV ve a Configuración → Importar CSV.');render();setTimeout(schedule,0);});
+A.logout=()=>guard(async()=>{await svc.logout();U.pid=null;U.proj=null;render();});
+A.importCsv=()=>guard(async()=>{
+  const inp=g('csvImport');if(!inp||!inp.files.length)throw E(422,'Selecciona uno o varios archivos CSV de tablas.');
+  const r=await svc.importCSV(await readFiles(inp));
+  U.imp={k:r.warn.length?'warn':'ok',m:'Se cargaron '+r.loaded.length+' tabla(s): '+r.loaded.join(', ')+'.'+(r.ignored.length?' Ignorados: '+r.ignored.join(', ')+'.':''),d:r.warn};if(!SES){U.imp=null;setFlash('Tablas cargadas. Tu cuenta no está en el users.csv importado: ingresa de nuevo.','warn');}render();
+});
+
+/* ===== Visor 3D de redes neuronales (Three.js) ===== */
+const CAP=32;
+const shpNums=s=>(String(s).match(/\d+/g)||[]).map(Number);
+function spec3D(family,cfg,rows){
+  if(family==='Feedforward'){
+    const L=[{n:cfg.input[0],label:'Entrada',sub:cfg.input[0]+' var.',k:'in'}];
+    cfg.layers.filter(l=>l.type==='dense').forEach((l,i)=>L.push({n:l.units,label:'Oculta '+(i+1),sub:l.units+' · '+l.act,k:'hid'}));
+    L.push({n:cfg.out,label:'Salida',sub:cfg.out+' · '+(cfg.out===1?'sigmoid':'softmax'),k:'out'});
+    return{mode:'neurons',stacks:[{title:'',layers:L}]};
+  }
+  if(family==='GAN'){
+    const mk=(inn,ls,outn,lab)=>[{n:inn,label:lab,sub:inn+'',k:'in'}].concat(ls.filter(l=>l.type==='dense').map((l,i)=>({n:l.units,label:'Oculta '+(i+1),sub:l.units+' · '+l.act,k:'hid'})),[{n:outn,label:'Salida',sub:outn+'',k:'out'}]);
+    return{mode:'neurons',stacks:[{title:'Generador',layers:mk(cfg.latent_dim,cfg.generator,cfg.data_dim,'Ruido')},{title:'Discriminador',layers:mk(cfg.data_dim,cfg.discriminator,1,'Datos')}]};
+  }
+  return{mode:'blocks',blocks:(rows||[]).map(r=>({label:r.name.replace(/^C\d+ · /,''),sub:r.shape,shape:shpNums(r.shape)}))};
+}
+function spec3DFromArch(family,cfg){const v=validateArch(family,cfg);return v.ok?spec3D(family,cfg,v.rows):null;}
+const Net3D={
+  inst:null,
+  show(id,spec,opts){
+    const box=g(id);if(!box||!spec)return;
+    if(!window.THREE){box.innerHTML='<div class="empty" style="border:0">No se pudo cargar Three.js: la vista 3D necesita conexión al CDN.</div>';return;}
+    if(!this.inst||this.inst.box!==box||!box.isConnected){this.dispose();this.inst=this.create(box,opts||{});}
+    if(this.inst)this.inst.setSpec(spec);
+  },
+  setWeights(w){if(this.inst)this.inst.setWeights(w);},
+  dispose(){if(this.inst){this.inst.dispose();this.inst=null;}},
+  create(box,opts){
+    const T=window.THREE;let renderer;
+    box.innerHTML='<canvas aria-label="Red neuronal en 3D: arrastra para girar, usa la rueda para acercar" role="img"></canvas><div class="tb"><button class="btn" data-k="rot">Giro: sí</button><button class="btn" data-k="pulse">Pulso: sí</button><button class="btn" data-k="reset">Reiniciar vista</button><button class="btn" data-k="in">＋</button><button class="btn" data-k="out">－</button></div><div class="hintb">Arrastra para girar · rueda para acercar</div>';
+    const cv=box.querySelector('canvas');
+    try{renderer=new T.WebGLRenderer({canvas:cv,antialias:true,alpha:true});}catch(e){box.innerHTML='<div class="empty" style="border:0">Tu navegador no pudo iniciar WebGL; la vista 3D no está disponible.</div>';return null;}
+    const scene=new T.Scene(),cam=new T.PerspectiveCamera(45,1.6,0.1,200);
+    scene.add(new T.AmbientLight(0xffffff,0.75));const dl=new T.DirectionalLight(0xffffff,0.8);dl.position.set(4,8,6);scene.add(dl);
+    const grp=new T.Group();scene.add(grp);
+    const st={th:-0.9,ph:1.2,rad:14,tgt:new T.Vector3(),rot:opts.rot!==false,pulse:true,t0:performance.now(),layerMats:[],pairs:[],nLayers:1,defRad:14};
+    const ac=new AbortController(),sig={signal:ac.signal};
+    let drag=null,raf=0,alive=true;
+    const clear=()=>{while(grp.children.length){const o=grp.children[0];grp.remove(o);o.traverse(n=>{if(n.geometry)n.geometry.dispose();if(n.material){if(n.material.map)n.material.map.dispose();n.material.dispose();}});}st.layerMats=[];st.pairs=[];};
+    const label=(txt,sub,x,y,z)=>{
+      const c=document.createElement('canvas');c.width=256;c.height=96;const x2=c.getContext('2d');
+      x2.fillStyle=cssVar('--fg')||'#222';x2.font='600 30px sans-serif';x2.textAlign='center';x2.fillText(txt,128,38);
+      x2.fillStyle=cssVar('--muted')||'#666';x2.font='24px monospace';x2.fillText(sub,128,76);
+      const sp=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),transparent:true,depthTest:false}));
+      sp.scale.set(3,1.12,1);sp.position.set(x,y,z);return sp;
+    };
+    const mix=(w,m)=>{const t=Math.min(1,Math.abs(w)/(m||1)),n=[0.55,0.6,0.68],s=w>=0?[0.18,0.5,1]:[1,0.5,0.1];return n.map((v,i)=>v+(s[i]-v)*t);};
+    const shown=n=>{if(n<=CAP)return Array.from({length:n},(_,i)=>i);return Array.from({length:CAP},(_,i)=>Math.round(i*(n-1)/(CAP-1)));};
+    const I={box,opts,ok:true,
+      setSpec(spec){
+        I.lastSpec=spec;clear();let maxY=2,maxX=0;
+        if(spec.mode==='neurons'){
+          const geo=new T.SphereGeometry(0.27,18,14),GX=3.4,zs=spec.stacks.length>1?[-3.2,3.2]:[0];
+          const cols={in:0x56B4E9,hid:0x4C7BE0,out:0xE69F00};
+          spec.stacks.forEach((s,si)=>{
+            const pos=[];
+            s.layers.forEach((l,li)=>{
+              const ids=shown(l.n),m=ids.length,cc=Math.ceil(Math.sqrt(m)),rr=Math.ceil(m/cc),pl=[];
+              const mat=new T.MeshStandardMaterial({color:cols[l.k]||0x4C7BE0,emissive:cols[l.k]||0x4C7BE0,emissiveIntensity:0.12,roughness:0.45});
+              st.layerMats.push(mat);
+              ids.forEach((id,k)=>{const r=Math.floor(k/cc),c=k%cc,y=(r-(rr-1)/2)*0.85,z=(c-(cc-1)/2)*0.85+zs[si];const mesh=new T.Mesh(geo,mat);mesh.position.set(li*GX,y,z);grp.add(mesh);pl.push({id,x:li*GX,y,z});maxY=Math.max(maxY,Math.abs(y)+1);});
+              pos.push(pl);maxX=Math.max(maxX,li*GX);
+              grp.add(label(l.label,l.sub,li*GX,(rr/2)*0.85+1.1,zs[si]));
+            });
+            if(s.title)grp.add(label(s.title,'',-2.2,0,zs[si]));
+            for(let li=0;li<pos.length-1;li++){
+              const A_=pos[li],B_=pos[li+1],ids=[],pa=[],co=[];
+              A_.forEach(a=>B_.forEach(b=>{ids.push([a.id,b.id]);pa.push(a.x,a.y,a.z,b.x,b.y,b.z);co.push(.55,.6,.68,.55,.6,.68);}));
+              const gm=new T.BufferGeometry();gm.setAttribute('position',new T.Float32BufferAttribute(pa,3));gm.setAttribute('color',new T.Float32BufferAttribute(co,3));
+              grp.add(new T.LineSegments(gm,new T.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.5})));
+              st.pairs.push({gm,ids,si,li,nOut:s.layers[li+1].n});
+            }
+          });
+          st.nLayers=Math.max(...spec.stacks.map(s=>s.layers.length));
+          st.tgt.set(maxX/2,0,0);st.defRad=Math.max(12,maxX*1.05+maxY*1.4);
+        }else{
+          let x=0;const bl=spec.blocks,sc=v=>Math.min(5,0.5+Math.log2(v+1)*0.6);let prev=null;
+          bl.forEach((b,i)=>{
+            const s=b.shape,w=s.length===3?0.25+Math.log2(s[2]+1)*0.35:0.35,h=s.length>=1?sc(s.length===1?s[0]:s[0]):1,d=s.length===3?sc(s[1]):s.length===2?sc(s[1]):0.5;
+            const col=i===0?0x56B4E9:i===bl.length-1?0xE69F00:0x4C7BE0;
+            const mat=new T.MeshStandardMaterial({color:col,transparent:true,opacity:0.6,roughness:0.5,emissive:col,emissiveIntensity:0.1});st.layerMats.push(mat);
+            const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),mat);x+=w/2;mesh.position.set(x,0,0);grp.add(mesh);
+            const ed=new T.LineSegments(new T.EdgesGeometry(mesh.geometry),new T.LineBasicMaterial({color:col}));ed.position.copy(mesh.position);grp.add(ed);
+            if(prev!==null){const gm=new T.BufferGeometry().setFromPoints([new T.Vector3(prev,0,0),new T.Vector3(x,0,0)]);grp.add(new T.Line(gm,new T.LineBasicMaterial({color:0x8896a6})));}
+            grp.add(label(b.label.slice(0,14),b.sub,x,h/2+1.1,0));maxY=Math.max(maxY,h);prev=x+w/2;x+=w/2+1.6;
+          });
+          st.nLayers=bl.length;st.tgt.set(x/2,0,0);st.defRad=Math.max(12,x*0.9+maxY);
+        }
+        st.rad=st.defRad;
+      },
+      setWeights(W){
+        if(!W||!st.pairs.length)return;
+        const K=W.filter((_,i)=>i%2===0);
+        st.pairs.forEach(p=>{
+          const k=K[p.li];if(!k||p.si>0)return;
+          let mx=0;k.data.forEach(v=>{const a=Math.abs(v);if(a>mx)mx=a;});
+          const col=p.gm.getAttribute('color');
+          p.ids.forEach(([a,b],n)=>{const c=mix(k.data[a*p.nOut+b]||0,mx);col.setXYZ(n*2,c[0],c[1],c[2]);col.setXYZ(n*2+1,c[0],c[1],c[2]);});
+          col.needsUpdate=true;
+        });
+      },
+      dispose(){alive=false;cancelAnimationFrame(raf);ac.abort();try{ro.disconnect();}catch(e){}clear();renderer.dispose();}
+    };
+    const resize=()=>{const w=box.clientWidth||300,h=box.clientHeight||190;renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};
+    const ro=new ResizeObserver(resize);ro.observe(box);resize();
+    cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';},sig);
+    cv.addEventListener('pointermove',e=>{if(!drag)return;st.th-=(e.clientX-drag.x)*0.008;st.ph=clamp(st.ph-(e.clientY-drag.y)*0.008,0.15,Math.PI-0.15);drag={x:e.clientX,y:e.clientY};},sig);
+    const up=()=>{drag=null;cv.style.cursor='grab';};cv.addEventListener('pointerup',up,sig);cv.addEventListener('pointercancel',up,sig);
+    cv.addEventListener('wheel',e=>{e.preventDefault();st.rad=clamp(st.rad*(e.deltaY>0?1.1:0.9),4,60);},{passive:false,signal:ac.signal});
+    box.querySelector('.tb').addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+      if(k==='rot'){st.rot=!st.rot;b.textContent='Giro: '+(st.rot?'sí':'no');}
+      else if(k==='pulse'){st.pulse=!st.pulse;b.textContent='Pulso: '+(st.pulse?'sí':'no');}
+      else if(k==='reset'){st.th=-0.9;st.ph=1.2;st.rad=st.defRad;}
+      else if(k==='in')st.rad=clamp(st.rad*0.85,4,60);else st.rad=clamp(st.rad*1.18,4,60);
+    },sig);
+    const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){st.rot=false;st.pulse=false;box.querySelector('[data-k=rot]').textContent='Giro: no';box.querySelector('[data-k=pulse]').textContent='Pulso: no';}
+    const loop=()=>{
+      if(!alive)return;if(!box.isConnected){I.dispose();if(Net3D.inst===I)Net3D.inst=null;return;}
+      const t=(performance.now()-st.t0)/1000;
+      if(st.rot&&!drag)st.th+=0.004;
+      cam.position.set(st.tgt.x+st.rad*Math.sin(st.ph)*Math.cos(st.th),st.tgt.y+st.rad*Math.cos(st.ph),st.tgt.z+st.rad*Math.sin(st.ph)*Math.sin(st.th));cam.lookAt(st.tgt);
+      const cur=Math.floor(t*1.5)%Math.max(1,st.nLayers);
+      st.layerMats.forEach((m,i)=>{const on=st.pulse&&(i%st.nLayers)===cur;m.emissiveIntensity+=((on?0.95:0.12)-m.emissiveIntensity)*0.25;});
+      renderer.render(scene,cam);raf=requestAnimationFrame(loop);
+    };
+    loop();return I;
+  }
+};
+new MutationObserver(()=>{if(Net3D.inst&&Net3D.inst.lastSpec)Net3D.inst.setSpec(Net3D.inst.lastSpec);}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ===== Diagrama 2D (alternativa accesible) ===== */
+function diagram2D(spec){
+  if(spec.mode==='blocks'){
+    const bl=spec.blocks,W=bl.length*128+20;
+    return '<svg viewBox="0 0 '+W+' 120" width="'+W+'" height="120" role="img" aria-label="Diagrama de bloques de la red">'+bl.map((b,i)=>'<rect class="bx" x="'+(10+i*128)+'" y="22" width="104" height="46" rx="5"/><text class="tl" x="'+(62+i*128)+'" y="42" text-anchor="middle">'+esc(b.label.slice(0,14))+'</text><text class="sl" x="'+(62+i*128)+'" y="58" text-anchor="middle">'+esc(b.sub)+'</text>'+(i?'<line class="ln" x1="'+(i*128-4)+'" y1="45" x2="'+(10+i*128)+'" y2="45"/>':'')).join('')+'</svg>';
+  }
+  return spec.stacks.map(s=>{
+    const cols=s.layers,gap=112,W=cols.length*gap+16,H=200,MAXN=7,sp=24,cy=84;
+    const pos=cols.map((c,i)=>Array.from({length:Math.min(c.n,MAXN)},(_,j)=>({x:50+i*gap,y:cy+(j-(Math.min(c.n,MAXN)-1)/2)*sp})));
+    let o='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Diagrama de la red '+esc(s.title)+'">';
+    for(let i=0;i<cols.length-1;i++)pos[i].forEach(a=>pos[i+1].forEach(b=>{o+='<line class="ln" x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'"/>';}));
+    cols.forEach((c,i)=>{pos[i].forEach(p=>{o+='<circle class="nd'+(c.k==='out'?' out':'')+'" cx="'+p.x+'" cy="'+p.y+'" r="7"/>';});o+='<text class="tl" x="'+(50+i*gap)+'" y="'+(H-30)+'" text-anchor="middle">'+esc(c.label)+'</text><text class="sl" x="'+(50+i*gap)+'" y="'+(H-14)+'" text-anchor="middle">'+esc(c.sub)+'</text>';});
+    return (s.title?'<h3 style="margin:8px 0 0">'+esc(s.title)+'</h3>':'')+'<div class="scroll">'+o+'</svg></div>';
+  }).join('');
+}
+
+/* ===== M03 Fundamentos neuronales ===== */
+const ACTF={relu:x=>Math.max(0,x),tanh:Math.tanh,sigmoid:x=>1/(1+Math.exp(-x)),elu:x=>x>=0?x:Math.exp(x)-1,linear:x=>x};
+const GLOS=[['Neurona','Unidad que suma sus entradas multiplicadas por pesos, añade un sesgo y aplica una función de activación.'],['Peso','Número que indica cuánto influye una entrada. El entrenamiento los ajusta.'],['Sesgo (bias)','Valor que se suma antes de la activación y desplaza el umbral de la neurona.'],['Función de activación','Introduce no linealidad: relu, tanh, sigmoid, elu o lineal.'],['Capa densa','Cada neurona se conecta con todas las de la capa anterior.'],['Capa oculta','Capa entre la entrada y la salida; aprende representaciones intermedias.'],['Época','Una pasada completa por los datos de entrenamiento.'],['Lote (batch)','Cantidad de muestras que se procesan antes de actualizar los pesos.'],['Pérdida','Medida del error que el entrenamiento intenta reducir.'],['Exactitud','Proporción de predicciones correctas.'],['Sobreajuste','La red memoriza el entrenamiento y falla con datos nuevos: la exactitud de validación se aleja de la de entrenamiento.'],['Dropout','Apaga neuronas al azar durante el entrenamiento para reducir el sobreajuste.'],['Optimizador','Algoritmo que actualiza los pesos: Adam, SGD, RMSprop, Adagrad.'],['Tasa de aprendizaje','Tamaño de cada ajuste de los pesos.'],['Softmax','Convierte la salida en probabilidades que suman 1 (clasificación con 3 o más clases).']];
+const EXAMPLES=[['Círculos: la capa oculta importa','Dos anillos no se separan con una línea. Una capa oculta pequeña ya lo logra.','Feedforward',{input:[2],layers:[{type:'dense',units:8,act:'tanh'}],out:1}],['XOR: una neurona no basta','Sin capa oculta la red solo traza una recta y no resuelve XOR.','Feedforward',{input:[2],layers:[{type:'dense',units:6,act:'relu'},{type:'dense',units:4,act:'relu'}],out:1}],['Espiral: más capas y neuronas','Tres brazos enroscados piden una red más profunda.','Feedforward',{input:[2],layers:[{type:'dense',units:32,act:'relu'},{type:'dense',units:16,act:'relu'},{type:'dense',units:8,act:'relu'}],out:3}]];
+V.fundamentos=async()=>{
+  const q=(U.gq||'').toLowerCase();
+  const gl=GLOS.filter(x=>!q||(x[0]+x[1]).toLowerCase().includes(q));
+  const h=head('Fundamentos neuronales','Conceptos, neuronas, capas, pesos y activaciones, con una red que puedes girar en 3D.')
+  +'<div class="g2"><section class="panel"><div class="ph"><h2>Una neurona</h2></div><p class="hint">y = activación(w₁·x₁ + w₂·x₂ + sesgo). Mueve los controles y mira cómo cambia la salida.</p>'
+  +'<div class="fields">'+[['x1','Entrada x₁',-3,3,1,0.5],['x2','Entrada x₂',-3,3,1,-1],['w1','Peso w₁',-3,3,.1,1.2],['w2','Peso w₂',-3,3,.1,-0.8],['b','Sesgo',-3,3,.1,0.3]].map(c=>'<label class="f" for="nu-'+c[0]+'">'+c[1]+' <output id="o-'+c[0]+'" class="mono">'+c[5]+'</output><input type="range" id="nu-'+c[0]+'" data-bind="neuron" min="'+c[2]+'" max="'+c[3]+'" step="'+c[4]+'" value="'+c[5]+'"></label>').join('')
+  +'<label class="f" for="nu-act">Activación<select id="nu-act" data-bind="neuron">'+ACTS.map(a=>'<option value="'+a+'">'+a+'</option>').join('')+'</select></label></div><p class="mono" id="nu-res"></p><canvas id="nu-cv" class="chart" role="img" aria-label="Curva de la función de activación con el punto actual"></canvas></section>'
+  +'<section class="panel"><div class="ph"><h2>Red en 3D</h2></div><p class="hint">Capas como columnas de esferas; cada línea es una conexión con un peso. Con una red entrenada, azul indica peso positivo y naranja negativo.</p><div class="v3" id="d3f"></div></section></div>'
+  +'<section class="panel"><div class="ph"><h2>Ejemplos guiados</h2></div><div class="g2">'+EXAMPLES.map((e,i)=>'<div class="card"><h3>'+esc(e[0])+'</h3><p class="hint" style="margin:6px 0 10px">'+esc(e[1])+'</p><button class="btn sm" data-act="exLoad" data-i="'+i+'">Abrir en el diseñador</button></div>').join('')+'</div></section>'
+  +'<section class="panel"><div class="ph"><h2>Glosario</h2><input type="search" id="gq" data-bind="gq" value="'+esc(U.gq||'')+'" placeholder="Buscar término" aria-label="Buscar en el glosario" style="max-width:240px"></div>'+(gl.length?'<dl class="kv">'+gl.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join('')+'</dl>':'<p class="hint">Sin resultados.</p>')+'</section>';
+  return{h,f:()=>{neuronUpdate();Net3D.show('d3f',spec3D('Feedforward',{input:[3],layers:[{type:'dense',units:6,act:'relu'},{type:'dense',units:5,act:'relu'}],out:2}));}};
+};
+function neuronUpdate(){
+  const v=id=>parseFloat(g('nu-'+id).value),act=g('nu-act').value;
+  ['x1','x2','w1','w2','b'].forEach(k=>{g('o-'+k).textContent=v(k).toFixed(1);});
+  const z=v('w1')*v('x1')+v('w2')*v('x2')+v('b'),y=ACTF[act](z);
+  g('nu-res').textContent='z = '+z.toFixed(2)+'  →  '+act+'(z) = '+y.toFixed(3);
+  const c=g('nu-cv'),r=c.getBoundingClientRect();if(!r.width)return;
+  const dpr=window.devicePixelRatio||1;c.width=r.width*dpr;c.height=r.height*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+  const w=r.width,h=r.height,m=28;x.fillStyle=cssVar('--surface');x.fillRect(0,0,w,h);
+  const X=t=>m+(t+4)/8*(w-2*m),Y=t=>h-m-(t+1.5)/4.5*(h-2*m);
+  x.strokeStyle=cssVar('--line');x.lineWidth=1;x.beginPath();x.moveTo(m,Y(0));x.lineTo(w-m,Y(0));x.moveTo(X(0),m/2);x.lineTo(X(0),h-m/2);x.stroke();
+  x.strokeStyle=cssVar('--accent');x.lineWidth=2.5;x.beginPath();for(let i=0;i<=80;i++){const t=-4+i/10,yy=Math.max(-1.5,Math.min(3,ACTF[act](t)));i?x.lineTo(X(t),Y(yy)):x.moveTo(X(t),Y(yy));}x.stroke();
+  const zc=clamp(z,-4,4),yc=clamp(y,-1.5,3);x.fillStyle=cssVar('--bad');x.beginPath();x.arc(X(zc),Y(yc),5,0,6.3);x.fill();
+  x.fillStyle=cssVar('--muted');x.font='11px '+cssVar('--f-mono');x.fillText('z',w-m+4,Y(0)-4);x.fillText('salida',X(0)+6,m/2+8);
+}
+B.neuron=()=>{if(g('nu-act'))neuronUpdate();};
+B.gq=el=>{U.gq=el.value;clearTimeout(qt_);qt_=setTimeout(()=>{render().then(()=>{const i=g('gq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}});},250);};
+A.exLoad=el=>{const e=EXAMPLES[+el.dataset.i];U.draft={id:null,name:e[0].split(':')[0]+' (ejemplo)',family:e[2],cfg:clone(e[3])};U.sel=-1;setFlash('Ejemplo cargado en el diseñador. Revisa la red y guárdala en el proyecto.');go('arquitecturas');};
+
+/* ===== M04 Diseñador de arquitecturas ===== */
+const curStack=()=>U.draft.family==='GAN'?U.draft.cfg[U.side]:U.draft.cfg.layers;
+const INLAB={Feedforward:['Variables de entrada'],RNN:['Pasos de tiempo','Variables por paso'],CNN:['Alto','Ancho','Canales']};
+const layerLbl=l=>(LNAME[l.type]||l.type)+' · '+(l.type==='dense'?l.units+' '+l.act:l.type==='dropout'?l.rate:l.type==='conv2d'?l.filters+'×'+l.kernel:l.type==='maxpool2d'?l.size:l.type==='flatten'?'':l.units);
+function numF(id,lab,val,k,min,max,step,bind){return '<label class="f" for="'+id+'">'+lab+'<input type="number" id="'+id+'" data-bind="'+bind+'" data-k="'+k+'" value="'+esc(val)+'" min="'+min+'" max="'+max+'" step="'+(step||1)+'"></label>';}
+function propsHTML(ed){
+  const d=U.draft,dis=ed?'':' disabled';let h='';
+  if(U.sel<0||!curStack()[U.sel]){
+    h='<h3 style="margin-bottom:8px">Propiedades generales</h3>';
+    if(d.family==='GAN')h+=numF('gp-lat','Dimensión latente (ruido)',d.cfg.latent_dim,'latent',2,256,1,'gp')+numF('gp-dat','Dimensión de los datos',d.cfg.data_dim,'data',1,256,1,'gp');
+    else{(INLAB[d.family]||[]).forEach((lb,i)=>{h+=numF('gp-in'+i,lb,d.cfg.input[i],'in'+i,1,500,1,'gp');});h+=numF('gp-out','Neuronas de salida',d.cfg.out,'out',1,100,1,'gp')+'<p class="hint">1 neurona usa sigmoid (2 clases); 2 o más usan softmax.</p>';}
+  }else{
+    const l=curStack()[U.sel];h='<h3 style="margin-bottom:8px">Capa '+(U.sel+1)+' · '+esc(LNAME[l.type])+'</h3>';
+    if(l.type==='dense'||RECUR.includes(l.type))h+=numF('lp-u','Neuronas / unidades',l.units,'units',1,512,1,'lp');
+    if(l.type==='dense'||l.type==='conv2d')h+='<label class="f" for="lp-a">Activación<select id="lp-a" data-bind="lp" data-k="act">'+ACTS.map(a=>'<option'+(a===l.act?' selected':'')+'>'+a+'</option>').join('')+'</select></label>';
+    if(l.type==='dropout')h+=numF('lp-r','Tasa de dropout',l.rate,'rate',0,0.9,0.05,'lp');
+    if(l.type==='conv2d')h+=numF('lp-f','Filtros',l.filters,'filters',1,256,1,'lp')+numF('lp-k','Tamaño del kernel',l.kernel,'kernel',1,7,1,'lp');
+    if(l.type==='maxpool2d')h+=numF('lp-s','Ventana de pooling',l.size,'size',2,4,1,'lp');
+    if(l.type==='flatten')h+='<p class="hint">Aplana la imagen a un vector para las capas densas.</p>';
+  }
+  return ed?h:h+'<p class="hint">Tu rol es de solo lectura: puedes explorar, pero no guardar.</p>';
+}
+function dvalHTML(v){
+  let h=v.ok?'<div class="banner ok">Arquitectura válida · <b class="mono">'+v.params.toLocaleString('es-PE')+'</b> parámetros entrenables'+(FAMS[U.draft.family].train?'':' · familia documentada: se puede guardar, aún no entrenar')+'</div>':'<div class="banner bad">La arquitectura no es válida:<ul>'+v.errors.map(e=>'<li>'+esc(e)+'</li>').join('')+'</ul></div>';
+  if(v.rows.length)h+=tbl(['Capa','Forma de salida','#Parámetros','Detalle'],v.rows.map(r=>'<tr><td>'+esc(r.name)+'</td><td class="mono">'+esc(r.shape)+'</td><td class="n mono">'+r.params.toLocaleString('es-PE')+'</td><td class="muted">'+esc(r.det||'')+'</td></tr>'));
+  return h+'<p class="hint" style="margin-top:8px">Vista previa en el navegador. El servicio valida de nuevo al guardar.</p>';
+}
+function refreshCanvas(){
+  if(!g('dval'))return;
+  const d=U.draft,v=validateArch(d.family,d.cfg,S().maxLayers);
+  g('dval').innerHTML=dvalHTML(v);
+  const spec=v.ok?spec3D(d.family,d.cfg,v.rows):null;
+  if(U.arch3d){if(spec)Net3D.show('d3box',spec);}
+  else g('dview').innerHTML=spec?diagram2D(spec):'<p class="hint">Corrige los errores para ver el diagrama.</p>';
+}
+V.arquitecturas=async()=>{
+  if(!U.pid)return needProject('Diseñador de arquitecturas');
+  const archs=await svc.listArchs(U.pid);
+  if(!U.draft)U.draft={id:null,name:'',family:'Feedforward',cfg:defaultCfg('Feedforward')};
+  const d=U.draft,ed=can('write'),st=curStack(),types=FAMS[d.family].types;
+  const h=head('Diseñador de arquitecturas','Elige la familia, arma las capas y revisa la red en 3D. Las formas de entrada y salida se validan antes de guardar.')
+  +'<section class="panel"><div class="row" style="gap:16px"><div><div class="seg" role="group" aria-label="Familia de red">'+Object.keys(FAMS).map(f=>'<button type="button" data-act="fam" data-f="'+f+'" aria-pressed="'+(d.family===f)+'">'+f+'</button>').join('')+'</div><div class="hint" style="margin:6px 0 0">'+esc(FAMS[d.family].doc)+' '+(FAMS[d.family].train?'<b>Entrenable en esta versión.</b>':'Documentada: se valida y guarda; el entrenamiento se habilita después.')+'</div></div>'
+  +'<label class="f" for="dname" style="flex:1;min-width:200px">Nombre de la arquitectura<input type="text" id="dname" data-bind="dname" value="'+esc(d.name)+'" maxlength="60" placeholder="Ej. MLP 2-16-8-3"></label>'
+  +'<div class="row" style="align-self:flex-end"><button class="btn primary" data-act="saveArch"'+(ed?'':' disabled')+'>Guardar versión</button><button class="btn" data-act="newArch">En blanco</button></div></div></section>'
+  +'<div class="designer"><section class="panel"><div class="ph"><h2>Capas</h2></div>'+(d.family==='GAN'?'<div class="seg" style="margin-bottom:8px"><button data-act="side" data-s="generator" aria-pressed="'+(U.side==='generator')+'">Generador</button><button data-act="side" data-s="discriminator" aria-pressed="'+(U.side==='discriminator')+'">Discriminador</button></div>':'')
+  +'<div class="li" aria-current="'+(U.sel<0)+'"><button class="lb" data-act="selLayer" data-i="-1">'+(d.family==='GAN'?'⚙ Dimensiones':'⮕ Entrada / salida')+'</button></div>'
+  +st.map((l,i)=>'<div class="li" aria-current="'+(U.sel===i)+'"><button class="lb" data-act="selLayer" data-i="'+i+'">'+(i+1)+'. '+esc(layerLbl(l))+'</button><button class="btn sm" data-act="mvLayer" data-i="'+i+'" data-d="-1" aria-label="Subir"'+(i===0||!ed?' disabled':'')+'>↑</button><button class="btn sm" data-act="mvLayer" data-i="'+i+'" data-d="1" aria-label="Bajar"'+(i===st.length-1||!ed?' disabled':'')+'>↓</button><button class="btn sm danger" data-act="delLayer" data-i="'+i+'" aria-label="Quitar"'+(ed?'':' disabled')+'>✕</button></div>').join('')
+  +(st.length?'':'<p class="hint">Sin capas ocultas.</p>')+'<div class="row" style="margin-top:8px">'+types.map(t=>'<button class="btn sm" data-act="addLayer" data-t="'+t+'"'+(ed&&st.length<S().maxLayers?'':' disabled')+'>+ '+LNAME[t]+'</button>').join('')+'</div></section>'
+  +'<section class="panel" style="min-width:0"><div class="ph"><h2>Lienzo</h2><div class="seg"><button data-act="view3d" data-v="1" aria-pressed="'+U.arch3d+'">3D</button><button data-act="view3d" data-v="0" aria-pressed="'+(!U.arch3d)+'">2D</button></div></div>'
+  +'<div id="dview">'+(U.arch3d?'<div class="v3" id="d3box"></div>':'')+'</div><div id="dval" style="margin-top:12px"></div></section>'
+  +'<section class="panel"><div class="ph"><h2>Propiedades</h2></div><div id="dprops">'+propsHTML(ed)+'</div></section></div>'
+  +'<section class="panel"><div class="ph"><h2>Versiones guardadas</h2></div>'+(archs.length?tbl(['Nombre','#Versión','Familia','#Parámetros','Creada','Por',''],archs.map(a=>'<tr><td>'+esc(a.name)+'</td><td class="n mono">v'+a.version+'</td><td>'+esc(a.family)+'</td><td class="n mono">'+validateArch(a.family,a.config_json).params.toLocaleString('es-PE')+'</td><td class="mono">'+fmtDT(a.created_at)+'</td><td>'+esc(uname(a.created_by))+'</td><td><button class="btn sm" data-act="openArch" data-id="'+esc(a.id)+'">Abrir</button></td></tr>')):empty('Sin arquitecturas','Arma una red arriba y guárdala: cada guardado crea una versión inmutable.'))+'</section>';
+  return{h,f:()=>{if(!U.arch3d)g('dview').innerHTML='';refreshCanvas();}};
+};
+let rcT=0;const refreshSoon=()=>{clearTimeout(rcT);rcT=setTimeout(refreshCanvas,120);};
+A.fam=el=>{U.draft.family=el.dataset.f;U.draft.cfg=defaultCfg(el.dataset.f);U.sel=-1;U.side='generator';Net3D.dispose();render();};
+A.side=el=>{U.side=el.dataset.s;U.sel=-1;render();};
+A.selLayer=el=>{U.sel=+el.dataset.i;render();};
+A.addLayer=el=>{if(!can('write'))return;const t=el.dataset.t;curStack().push(Object.assign({type:t},clone(LDEF[t])));U.sel=curStack().length-1;render();};
+A.delLayer=el=>{if(!can('write'))return;curStack().splice(+el.dataset.i,1);U.sel=-1;render();};
+A.mvLayer=el=>{if(!can('write'))return;const s=curStack(),i=+el.dataset.i,j=i+(+el.dataset.d);if(j<0||j>=s.length)return;[s[i],s[j]]=[s[j],s[i]];U.sel=j;render();};
+A.view3d=el=>{U.arch3d=el.dataset.v==='1';if(!U.arch3d)Net3D.dispose();render();};
+A.newArch=()=>{U.draft={id:null,name:'',family:'Feedforward',cfg:defaultCfg('Feedforward')};U.sel=-1;Net3D.dispose();render();};
+A.openArch=el=>guard(async()=>{const a=(await svc.listArchs(U.pid)).find(x=>x.id===el.dataset.id);if(a){U.draft={id:a.id,name:a.name,family:a.family,cfg:clone(a.config_json)};U.sel=-1;setFlash('«'+a.name+'» v'+a.version+' cargada. Al guardar se crea la versión '+(a.version+1)+'.');render();}});
+A.saveArch=()=>guard(async()=>{const d=U.draft,r=await svc.createArch(U.pid,{name:d.name,family:d.family,config:d.cfg});setFlash('Arquitectura guardada como versión '+r.version+' ('+r.params.toLocaleString('es-PE')+' parámetros).');render();});
+B.dname=el=>{U.draft.name=el.value;};
+B.lp=(el,ev)=>{const l=curStack()[U.sel];if(!l||!can('write'))return;const k=el.dataset.k;l[k]=k==='act'?el.value:+el.value;if(ev==='change'||el.tagName==='SELECT')render();else refreshSoon();};
+B.gp=(el,ev)=>{if(!can('write'))return;const c=U.draft.cfg,k=el.dataset.k,v=+el.value;
+  if(k==='latent')c.latent_dim=v;else if(k==='data')c.data_dim=v;else if(k==='out')c.out=v;else if(/^in\d$/.test(k))c.input[+k[2]]=v;
+  if(ev==='change')render();else refreshSoon();};
+
+/* ===== M05 Datasets ===== */
+V.datasets=async()=>{
+  if(!U.pid)return needProject('Datasets');
+  const ds=await svc.listDatasets(U.pid),ed=can('write');
+  let prev='';
+  if(U.dsPrev&&ds.some(d=>d.id===U.dsPrev.id)){const p=U.dsPrev,mx=Math.max(...p.counts,1);prev='<section class="panel"><div class="ph"><h2>Vista previa · '+esc(ds.find(d=>d.id===p.id).name)+'</h2><button class="btn sm" data-act="dsClose">Cerrar</button></div>'+tbl(p.cols,p.head.map(r=>'<tr>'+r.map(v=>'<td class="mono">'+esc(v)+'</td>').join('')+'</tr>'))+'<h3 style="margin:12px 0 6px">Balance de clases</h3>'+p.classes.map((c,i)=>'<div class="row" style="margin-bottom:4px"><span style="width:110px">'+esc(c)+'</span><div style="flex:1;min-width:80px"><div class="prog"><i style="width:'+Math.round(p.counts[i]/mx*100)+'%;background:'+PAL[i%6]+'"></i></div></div><span class="mono">'+p.counts[i]+'</span></div>').join('')+'</section>';}
+  const h=head('Datasets','Registro, validación y versionado. Los datos son archivos CSV (variables numéricas y, en la última columna, la clase).')
+  +(ed?'<section class="panel"><div class="ph"><h2>Registrar dataset</h2></div><form data-form="newDataset"><div class="fields"><label class="f" for="ds-name">Nombre<input type="text" id="ds-name" name="name" required maxlength="60"></label><label class="f" for="ds-src">Origen<select id="ds-src" name="source" data-bind="dsrc"><option value="csv">Archivo CSV</option><option value="generado">Generado (ejemplos)</option></select></label><label class="f" for="ds-tr">Entrenamiento %<input type="number" id="ds-tr" name="tr" value="70" min="50" max="90"></label><label class="f" for="ds-va">Validación %<input type="number" id="ds-va" name="va" value="15" min="5" max="30"></label></div>'
+  +'<div id="ds-csv"><label class="f" for="ds-file">Archivo CSV (.csv o .txt, máximo '+S().maxUploadKB+' KB)<input type="file" id="ds-file" accept=".csv,.txt,text/csv,text/plain" data-bind="dscsv"></label><div id="csvrep" style="margin-top:8px"></div></div>'
+  +'<div id="ds-gen" hidden><div class="fields"><label class="f" for="ds-kind">Tipo<select id="ds-kind" name="kind">'+Object.keys(GEN).map(k=>'<option value="'+k+'">'+GEN[k][0]+'</option>').join('')+'</select></label><label class="f" for="ds-n">Muestras<input type="number" id="ds-n" name="n" value="400" min="60" max="2000"></label><label class="f" for="ds-noise">Ruido (0–0.4)<input type="number" id="ds-noise" name="noise" value="0.1" min="0" max="0.4" step="0.02"></label></div></div>'
+  +'<label class="f" for="ds-desc" style="margin:8px 0 12px">Descripción<textarea id="ds-desc" name="description" maxlength="300"></textarea></label><p class="hint">Si el nombre ya existe en el proyecto, se crea una nueva versión y la anterior se conserva.</p><button class="btn primary" type="submit">Registrar dataset</button></form></section>':'<div class="banner warn">Tu rol es de solo lectura: puedes ver los datasets, pero no registrarlos.</div>')
+  +'<section class="panel"><div class="ph"><h2>Datasets del proyecto</h2></div>'+(ds.length?tbl(['Nombre','#Versión','Origen','#Filas','#Variables','Clases','Separación','Creado',''],ds.map(d=>{const m=d.metadata_json;return '<tr><td>'+esc(d.name)+(m.description?'<div class="muted" style="font-size:12px">'+esc(m.description.slice(0,70))+'</div>':'')+'</td><td class="n mono">v'+d.version+'</td><td>'+(m.source==='csv'?'CSV · '+esc(m.fileName||''):'Generado · '+esc(GEN[m.kind]?GEN[m.kind][0]:''))+'</td><td class="n">'+m.rows+'</td><td class="n">'+m.nFeat+'</td><td>'+m.classes.length+'</td><td class="mono">'+m.split.tr+'/'+m.split.va+'/'+m.split.te+'</td><td class="mono">'+fmtDT(d.created_at)+'</td><td><div class="row"><button class="btn sm" data-act="dsView" data-id="'+esc(d.id)+'">Ver</button>'+(ed?(U.confirm===d.id?'<button class="btn sm danger" data-act="dsDel" data-id="'+esc(d.id)+'">Confirmar</button>':'<button class="btn sm" data-act="dsDel" data-id="'+esc(d.id)+'">Eliminar</button>'):'')+'</div></td></tr>';}))
+   :empty('Sin datasets','Registra un CSV o genera un ejemplo para poder entrenar.'))+'</section>'+prev;
+  return{h};
+};
+A.dsView=el=>guard(async()=>{U.dsPrev={id:el.dataset.id,...(await svc.previewDataset(U.pid,el.dataset.id))};render();});
+A.dsClose=()=>{U.dsPrev=null;render();};
+A.dsDel=el=>guard(async()=>{
+  if(U.confirm!==el.dataset.id){U.confirm=el.dataset.id;render();return;}
+  U.confirm=null;await svc.deleteDataset(U.pid,el.dataset.id);setFlash('Dataset eliminado.');render();
+});
+B.dsrc=el=>{const csv=el.value==='csv';g('ds-csv').hidden=!csv;g('ds-gen').hidden=csv;};
+B.dscsv=async el=>{
+  const f=el.files&&el.files[0],rep=g('csvrep');U.pending=null;if(!f){rep.innerHTML='';return;}
+  const text=await f.text();U.pending={fileName:f.name,size:f.size,mime:f.type,text};
+  const v=validateCSV(text,U.pending,S());
+  rep.innerHTML='<ul style="list-style:none;padding:0;margin:0;font-size:13px">'+v.checks.map(c=>'<li style="color:var(--'+(c.ok?'ok':'bad')+')">'+(c.ok?'✓ ':'✕ ')+esc(c.msg)+'</li>').join('')+'</ul>';
+};
+F.newDataset=f=>guard(async()=>{
+  const src=f.source.value,p=U.pending;
+  if(src==='csv'&&!p)throw E(422,'Selecciona un archivo CSV.');
+  await svc.createDataset(U.pid,{name:f.name.value,description:f.description.value,source:src,tr:f.tr.value,va:f.va.value,kind:f.kind.value,n:f.n.value,noise:f.noise.value,text:p&&p.text,fileName:p&&p.fileName,size:p&&p.size,mime:p&&p.mime});
+  U.pending=null;setFlash('Dataset registrado.');render();
+});
+
+/* ===== Gráficos de curvas ===== */
+function drawLines(id,series,o){
+  const c=g(id);if(!c)return;const r=c.getBoundingClientRect();if(!r.width||!r.height)return;
+  const dpr=window.devicePixelRatio||1;c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);
+  const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);const w=r.width,h=r.height,m={l:40,r:12,t:12,b:24},pw=w-m.l-m.r,ph=h-m.t-m.b;
+  x.fillStyle=cssVar('--surface');x.fillRect(0,0,w,h);
+  const all=[];series.forEach(s=>s.data.forEach(v=>{if(isFinite(v))all.push(v);}));
+  const n=Math.max(o.n||2,2),ymax=o.ymax!=null?o.ymax:Math.max(0.1,...all)*1.08;
+  const X=e=>m.l+e/(n-1)*pw,Y=v=>m.t+ph-v/ymax*ph;
+  x.font='11px '+cssVar('--f-mono');x.lineWidth=1;
+  for(let i=0;i<=4;i++){const v=ymax*i/4,y=Y(v);x.strokeStyle=cssVar('--line');x.beginPath();x.moveTo(m.l,y);x.lineTo(w-m.r,y);x.stroke();x.fillStyle=cssVar('--muted');x.textAlign='right';x.textBaseline='middle';x.fillText(v.toFixed(o.dec),m.l-6,y);}
+  x.textAlign='center';x.textBaseline='top';for(let j=0;j<5;j++){const e=Math.round((n-1)*j/4);x.fillStyle=cssVar('--muted');x.fillText(String(e+1),X(e),h-m.b+6);}
+  series.forEach(s=>{
+    x.strokeStyle=s.color;x.lineWidth=2;x.setLineDash(s.dash||[]);x.beginPath();let st=false,last=-1;
+    for(let e=0;e<s.data.length;e++){const v=s.data[e];if(!isFinite(v))continue;if(!st){x.moveTo(X(e),Y(v));st=true;}else x.lineTo(X(e),Y(v));last=e;}
+    x.stroke();x.setLineDash([]);
+    if(last>=0){x.fillStyle=s.color;x.beginPath();x.arc(X(last),Y(s.data[last]),3.5,0,6.3);x.fill();}
+  });
+}
+const VAL_C='#E69F00';
+function drawJobCharts(s,n){const a=cssVar('--accent');drawLines('chLoss',[{data:s.loss,color:a},{data:s.val_loss,color:VAL_C,dash:[6,4]}],{dec:2,n});drawLines('chAcc',[{data:s.accuracy,color:a},{data:s.val_accuracy,color:VAL_C,dash:[6,4]}],{dec:2,ymax:1,n});}
+const chartsHTML='<div class="charts"><div><h3 class="muted" style="font-size:12px;margin-bottom:4px">PÉRDIDA POR ÉPOCA</h3><canvas id="chLoss" class="chart" role="img" aria-label="Curva de pérdida"></canvas></div><div><h3 class="muted" style="font-size:12px;margin-bottom:4px">EXACTITUD POR ÉPOCA</h3><canvas id="chAcc" class="chart" role="img" aria-label="Curva de exactitud"></canvas></div></div><div class="legend"><span><i style="background:var(--accent)"></i>Entrenamiento</span><span><i style="background:'+VAL_C+'"></i>Validación (línea discontinua)</span></div>';
+function jobWeights(jid){
+  if(LIVEW[jid])return LIVEW[jid];
+  const v=DB.model_versions.find(x=>x.job_id===jid),o=v&&DB.objects[v.storage_key];
+  if(o){try{return JSON.parse(o.content).weights;}catch(e){}}
+  return null;
+}
+
+/* ===== M06 Entrenamientos ===== */
+function monitorHTML(d){
+  const j=d.job,s=d.series,P=j.params_json,L=j.last_json||{},act=isActive(j);
+  const cur=j.status==='QUEUED'?0:j.status==='PREPARING'?1:j.status==='RUNNING'?2:3,fin=TERMINAL.includes(j.status)?j.status:'COMPLETED';
+  const steps=['QUEUED','PREPARING','RUNNING',fin];
+  return '<div class="ph"><h2>'+esc(j.no)+(j.label?' · '+esc(j.label):'')+'</h2>'+pill(j.status)+'</div><div class="step" aria-label="Ciclo de vida del trabajo">'+steps.map((x,i)=>'<span class="'+(i<cur?'done':i===cur?'on':'')+'">'+esc(STATE_ES[x])+'</span>').join('')+'</div>'
+  +(j.state_reason?'<p class="hint">'+esc(j.state_reason)+'</p>':'')+(act&&j.cancel_requested?'<div class="banner warn">Cancelación solicitada: el worker la confirmará al terminar la época en curso.</div>':'')
+  +'<div class="row" style="margin-bottom:6px"><div style="flex:1;min-width:120px">'+bar(j.progress)+'</div><span class="mono">'+j.progress+'% · época '+(L.epoch||0)+' / '+P.epochs+'</span></div>'
+  +'<div class="tiles" style="margin:10px 0"><div class="tile"><span>Pérdida</span><b>'+(L.loss!=null?L.loss.toFixed(4):'—')+'</b></div><div class="tile"><span>Exactitud</span><b>'+pct(L.acc)+'</b></div><div class="tile"><span>Pérdida val.</span><b>'+(L.val_loss!=null?L.val_loss.toFixed(4):'—')+'</b></div><div class="tile"><span>Exactitud val.</span><b>'+pct(L.val_acc)+'</b></div></div>'
+  +chartsHTML+'<div class="row" style="margin:10px 0">'+(act&&can('cancel')&&!j.cancel_requested?'<button class="btn danger" data-act="cancelJob" data-id="'+esc(j.id)+'">Cancelar entrenamiento</button>':'')+((j.status==='FAILED'||j.status==='CANCELLED')&&can('write')?'<button class="btn" data-act="retry" data-id="'+esc(j.id)+'">Reintentar</button>':'')+(j.status==='COMPLETED'?'<button class="btn" data-act="nav" data-v="evaluacion">Ver evaluación</button>':'')+'</div>'
+  +'<h3 style="margin-bottom:6px">Registro reciente</h3><pre class="code" style="max-height:170px">'+esc((j.logs_json||[]).slice(-12).map(l=>new Date(l.t).toLocaleTimeString('es-PE',{hour12:false})+'  '+l.m).join('\n')||'Sin eventos.')+'</pre>';
+}
+function jobsRows(jobs){
+  return jobs.map(j=>{const L=j.last_json||{};return '<tr'+(j.id===U.jobSel?' class="sel"':'')+'><td class="mono">'+esc(j.no)+(j.label?'<div class="muted">'+esc(j.label)+'</div>':'')+'</td><td>'+esc(j.arch)+'</td><td>'+esc(j.dataset)+'</td><td>'+pill(j.status)+'</td><td style="min-width:100px">'+bar(j.progress)+'</td><td class="n mono">'+(L.epoch||0)+'/'+j.params_json.epochs+'</td><td class="n mono">'+pct(L.val_acc)+'</td><td class="mono">'+fmtDT(j.started_at||j.created_at)+'</td><td class="mono">'+fmtDur(j.dur)+'</td><td><button class="btn sm" data-act="trSel" data-id="'+esc(j.id)+'">Ver</button></td></tr>';}).join('');
+}
+async function liveTraining(){
+  if(!g('monitor')||!U.pid)return;
+  try{
+    const jobs=await svc.listJobs(U.pid);
+    g('jobsBody').innerHTML=jobs.length?tbl(['Entrenamiento','Arquitectura','Dataset','Estado','Progreso','#Época','#Exact. val.','Inicio','Duración',''],[jobsRows(jobs)]):empty('Sin entrenamientos','Inicia uno con el formulario.');
+    if(U.jobSel){const d=await svc.getJob(U.jobSel);g('monitor').innerHTML=monitorHTML(d);drawJobCharts(d.series,d.job.params_json.epochs);const w=jobWeights(d.job.id);if(w)Net3D.setWeights(w);}
+  }catch(e){}
+}
+V.entrenamientos=async()=>{
+  if(!U.pid)return needProject('Entrenamientos');
+  const [jobs,archs,dss]=await Promise.all([svc.listJobs(U.pid),svc.listArchs(U.pid),svc.listDatasets(U.pid)]);
+  if(!U.jobSel||!jobs.some(j=>j.id===U.jobSel))U.jobSel=jobs.length?jobs[0].id:null;
+  const ed=can('write'),role=U.proj?U.proj.role:'viewer';
+  const form=ed?'<section class="panel"><div class="ph"><h2>Nuevo entrenamiento</h2><span class="muted" style="font-size:12px">Prioridad en la cola por rol: '+(role==='admin'?'alta':role==='owner'?'media':'normal')+'</span></div>'
+   +(archs.length&&dss.length?'<form data-form="newJob"><div class="fields"><label class="f" for="tj-a">Arquitectura<select id="tj-a" name="a">'+archs.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+' v'+a.version+' · '+a.family+(FAMS[a.family].train?'':' (no entrenable aún)')+'</option>').join('')+'</select></label><label class="f" for="tj-d">Dataset<select id="tj-d" name="d">'+dss.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+' v'+d.version+' · '+d.metadata_json.rows+' filas</option>').join('')+'</select></label><label class="f" for="tj-o">Optimizador<select id="tj-o" name="opt">'+Object.keys(OPTS).map(k=>'<option value="'+k+'">'+OPTS[k]+'</option>').join('')+'</select></label><label class="f" for="tj-lr">Tasa de aprendizaje<select id="tj-lr" name="lr">'+[0.1,0.03,0.01,0.003,0.001].map(v=>'<option'+(v===0.01?' selected':'')+'>'+v+'</option>').join('')+'</select></label><label class="f" for="tj-e">Épocas<input type="number" id="tj-e" name="epochs" value="80" min="1" max="'+S().maxEpochs+'"></label><label class="f" for="tj-b">Tamaño de lote<input type="number" id="tj-b" name="batch" value="32" min="1" max="512"></label><label class="f" for="tj-s">Semilla<input type="number" id="tj-s" name="seed" value="42" min="0" max="999999"></label><label class="f" for="tj-l">Etiqueta (opcional)<input type="text" id="tj-l" name="label" maxlength="60"></label></div><div class="row"><button class="btn primary" type="submit">Validar y encolar</button><span class="hint" style="margin:0">El servicio valida arquitectura, dataset y límites antes de encolar.</span></div></form>'
+     :empty('Faltan insumos','Necesitas al menos una arquitectura (M04) y un dataset (M05) en este proyecto.'))+'</section>'
+   :'<div class="banner warn">Tu rol es de solo lectura: puedes seguir los entrenamientos, pero no iniciarlos ni cancelarlos.</div>';
+  const jsel=jobs.find(j=>j.id===U.jobSel),d=jsel?await svc.getJob(jsel.id):null;
+  const h=head('Entrenamientos','Cola, estado y métricas por época. El progreso se actualiza sin recargar la pantalla.','<span class="chip'+(bus.rt?'':' off')+'"><span class="d"></span>'+(bus.rt?'Tiempo real conectado':'Sin conexión')+'</span>'+(bus.rt?'<button class="btn sm" data-act="rtOff">Simular desconexión</button>':'<button class="btn sm primary" data-act="rtOn">Reconectar</button>'))
+  +(bus.rt?'':'<div class="banner warn">La conexión en tiempo real está cortada: la pantalla no se actualiza. Al reconectar se recupera el estado consultando el servicio.</div>')+form
+  +'<section class="panel"><div class="ph"><h2>Trabajos</h2></div><div id="jobsBody">'+(jobs.length?tbl(['Entrenamiento','Arquitectura','Dataset','Estado','Progreso','#Época','#Exact. val.','Inicio','Duración',''],[jobsRows(jobs)]):empty('Sin entrenamientos','Aquí aparecerán los trabajos en cola, en ejecución y terminados.'))+'</div></section>'
+  +'<div class="g2"><section class="panel" id="monitor">'+(d?monitorHTML(d):empty('Sin trabajo seleccionado','Elige un entrenamiento para ver su estado.'))+'</section><section class="panel"><div class="ph"><h2>Red en 3D</h2></div><p class="hint">'+(d?'Estructura de '+esc(jsel.arch)+'. Las conexiones se colorean con los pesos mientras entrena.':'Selecciona un trabajo para ver su red.')+'</p><div class="v3" id="tr3d"></div></section></div>';
+  LIVE=liveTraining;
+  return{h,f:()=>{if(d){drawJobCharts(d.series,d.job.params_json.epochs);const sn=d.job.snapshot_json.architecture,sp=spec3DFromArch(sn.family,sn.config);if(sp){Net3D.show('tr3d',sp);const w=jobWeights(d.job.id);if(w)Net3D.setWeights(w);}}else g('tr3d').innerHTML='';}};
+};
+A.trSel=el=>{U.jobSel=el.dataset.id;Net3D.dispose();render();};
+A.cancelJob=el=>guard(async()=>{await svc.cancelJob(el.dataset.id);render();});
+A.rtOff=()=>{bus.rt=false;render();};
+A.rtOn=()=>{bus.rt=true;render();};
+F.newJob=f=>guard(async()=>{const id=await svc.createJob(U.pid,{architecture_id:f.a.value,dataset_id:f.d.value,optimizer:f.opt.value,lr:f.lr.value,epochs:f.epochs.value,batch:f.batch.value,seed:f.seed.value,label:f.label.value});U.jobSel=id;Net3D.dispose();setFlash('Entrenamiento encolado.');render();});
+
+/* ===== M07 Evaluación y métricas ===== */
+V.evaluacion=async()=>{
+  if(!U.pid)return needProject('Evaluación y métricas');
+  const jobs=(await svc.listJobs(U.pid)).filter(j=>j.status==='COMPLETED'||(j.status==='CANCELLED'&&j.last_json&&j.last_json.epoch));
+  if(!jobs.length)return{h:head('Evaluación y métricas','Pérdida y exactitud por época, evaluación final y comparación de ejecuciones.')+empty('Aún no hay entrenamientos terminados','Cuando un entrenamiento termine verás aquí sus curvas, la matriz de confusión y la comparación entre ejecuciones.','<p><button class="btn primary" data-act="nav" data-v="entrenamientos">Ir a Entrenamientos</button></p>')};
+  U.cmp=U.cmp.filter(id=>jobs.some(j=>j.id===id));
+  const done=jobs.filter(j=>j.status==='COMPLETED');
+  if(!U.jobSel||!jobs.some(j=>j.id===U.jobSel))U.jobSel=jobs[0].id;
+  const fj=jobs.find(j=>j.id===U.jobSel),d=await svc.getJob(fj.id),r=fj.result_json;
+  let h=head('Evaluación y métricas','Pérdida y exactitud por época, evaluación final con datos de prueba y comparación de ejecuciones.')
+  +'<section class="panel"><div class="ph"><h2>Ejecuciones</h2><span class="muted" style="font-size:12px">Marca dos o más para compararlas</span></div>'+tbl(['Comparar','Entrenamiento','Arquitectura','Dataset','#Parámetros','Optimizador','#Exact. prueba','#Pérdida prueba',''],jobs.map(j=>{const rr=j.result_json;return '<tr'+(j.id===U.jobSel?' class="sel"':'')+'><td><input type="checkbox" data-bind="cmp" data-id="'+esc(j.id)+'" aria-label="Comparar '+esc(j.no)+'"'+(U.cmp.includes(j.id)?' checked':'')+(j.status==='COMPLETED'?'':' disabled')+'></td><td class="mono">'+esc(j.no)+'</td><td>'+esc(j.arch)+'</td><td>'+esc(j.dataset)+'</td><td class="n mono">'+(rr?rr.params:j.snapshot_json.architecture.params)+'</td><td class="mono" style="font-size:11px">'+esc(OPTS[j.params_json.optimizer])+' lr '+j.params_json.lr+'</td><td class="n mono">'+(rr?pct(rr.teAcc):'—')+'</td><td class="n mono">'+(rr?rr.teLoss.toFixed(3):'—')+'</td><td><button class="btn sm" data-act="trSel2" data-id="'+esc(j.id)+'">Ver</button></td></tr>';}))+'</section>';
+  if(U.cmp.length>=2){
+    const cs=U.cmp.map(id=>jobs.find(j=>j.id===id));
+    h+='<section class="panel"><div class="ph"><h2>Comparación de ejecuciones</h2></div><div class="charts"><div><h3 class="muted" style="font-size:12px;margin-bottom:4px">EXACTITUD DE VALIDACIÓN</h3><canvas id="cmpA" class="chart" role="img" aria-label="Comparación de exactitud de validación"></canvas></div><div><h3 class="muted" style="font-size:12px;margin-bottom:4px">PÉRDIDA DE VALIDACIÓN</h3><canvas id="cmpL" class="chart" role="img" aria-label="Comparación de pérdida de validación"></canvas></div></div><div class="legend">'+cs.map((j,i)=>'<span><i style="background:'+PAL[i%6]+'"></i>'+esc(j.no+' · '+j.arch)+'</span>').join('')+'</div></section>';
+  }
+  h+='<div class="g2"><section class="panel"><div class="ph"><h2>'+esc(fj.no)+' · '+esc(fj.arch)+'</h2>'+pill(fj.status)+'</div>';
+  if(r){
+    const gap=r.trAcc-r.teAcc;
+    h+='<div class="tiles"><div class="tile"><span>Exact. entrenamiento</span><b>'+pct(r.trAcc)+'</b></div><div class="tile"><span>Exact. validación</span><b>'+pct(r.vaAcc)+'</b></div><div class="tile"><span>Exact. prueba</span><b>'+pct(r.teAcc)+'</b></div><div class="tile"><span>Pérdida prueba</span><b>'+r.teLoss.toFixed(3)+'</b></div></div>'
+    +(gap>0.08?'<div class="banner warn" style="margin-top:10px">Señal de sobreajuste: entrenamiento supera a prueba por '+(gap*100).toFixed(1)+' puntos.</div>':'')
+    +'<h3 style="margin:12px 0 6px">Matriz de confusión (datos de prueba)</h3><div class="scroll"><table class="cm" style="border-collapse:collapse"><tr><th>Real \\ Predicho</th>'+r.classes.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+r.cm.map((row,i)=>{const mx=Math.max(1,...r.cm.flat());return '<tr><th>'+esc(r.classes[i])+'</th>'+row.map((v,k)=>'<td style="background:color-mix(in srgb,var(--'+(i===k?'accent':'bad')+') '+Math.round(v/mx*(i===k?60:45))+'%,transparent)">'+v+'</td>').join('')+'</tr>';}).join('')+'</table></div>';
+  }else h+='<p class="hint">Este trabajo se detuvo antes de la evaluación final.</p>';
+  h+='<h3 style="margin:14px 0 6px">Curvas por época</h3>'+chartsHTML+'</section>'
+  +'<section class="panel"><div class="ph"><h2>Red entrenada en 3D</h2></div><p class="hint">Azul: peso positivo · naranja: peso negativo · más intenso: mayor magnitud.</p><div class="v3" id="ev3d"></div>'
+  +'<h3 style="margin:14px 0 6px">Limitaciones y observaciones</h3>'+(can('write')?'<form data-form="notes" data-id="'+esc(fj.id)+'"><textarea id="ev-notes" name="notes" maxlength="1500" aria-label="Limitaciones y observaciones">'+esc(fj.notes)+'</textarea><div class="row" style="margin-top:8px"><button class="btn" type="submit">Guardar observaciones</button></div></form>':'<p>'+esc(fj.notes||'Sin observaciones.')+'</p>')+'</section></div>';
+  return{h,f:()=>{
+    drawJobCharts(d.series,d.job.params_json.epochs);
+    if(U.cmp.length>=2){const cs=U.cmp.map(id=>series(id)),n=Math.max(...U.cmp.map(id=>jobs.find(j=>j.id===id).params_json.epochs));drawLines('cmpA',cs.map((s,i)=>({data:s.val_accuracy,color:PAL[i%6]})),{dec:2,ymax:1,n});drawLines('cmpL',cs.map((s,i)=>({data:s.val_loss,color:PAL[i%6]})),{dec:2,n});}
+    const sn=fj.snapshot_json.architecture,sp=spec3DFromArch(sn.family,sn.config);if(sp){Net3D.show('ev3d',sp);const w=jobWeights(fj.id);if(w)Net3D.setWeights(w);}
+  }};
+};
+A.trSel2=el=>{U.jobSel=el.dataset.id;Net3D.dispose();render();};
+B.cmp=el=>{const id=el.dataset.id;U.cmp=U.cmp.filter(x=>x!==id);if(el.checked)U.cmp.push(id);Net3D.dispose();render();};
+F.notes=f=>guard(async()=>{await svc.saveNotes(f.dataset.id,f.notes.value);setFlash('Observaciones guardadas.');render();});
+
+/* ===== M08 Registro de modelos ===== */
+V.modelos=async()=>{
+  if(!U.pid)return needProject('Registro de modelos');
+  const vs=await svc.listVersions(U.pid),role=U.proj.role;
+  const acts=v=>(MV_NEXT[v.status]||[]).map(to=>{const ok=canDo(role,MV_MIN[to]==='owner'?'approve':'review');const lb={revisado:'Marcar revisado',aprobado:'Aprobar',retirado:'Retirar',borrador:'Volver a borrador'}[to];return '<button class="btn sm" data-act="mvTo" data-id="'+esc(v.id)+'" data-to="'+to+'"'+(ok?'':' disabled title="Requiere rol superior"')+'>'+lb+'</button>';}).join('')+'<button class="btn sm" data-act="mvExp" data-id="'+esc(v.id)+'"'+(canDo(role,'export')?'':' disabled')+'>Exportar</button>';
+  const h=head('Registro de modelos','Versiones inmutables con trazabilidad. Un modelo publicado no se sobrescribe: un nuevo entrenamiento crea una nueva versión.')
+  +'<section class="panel"><div class="ph"><h2>Versiones</h2></div>'+(vs.length?tbl(['Versión','Estado','Arquitectura','Dataset','#Exact. prueba','Checksum','Creada','Acciones'],vs.map(v=>{const m=v.meta_json||{};return '<tr><td class="mono">v'+v.version+'<div class="muted">'+esc(sid(v.job_id))+'</div></td><td>'+pill(v.status)+'</td><td>'+esc(m.arch||'')+'<div class="muted mono" style="font-size:11px">'+esc(OPTS[m.optimizer]||'')+' lr '+m.lr+' · semilla '+m.seed+'</div></td><td>'+esc(m.dataset||'')+'</td><td class="n mono">'+pct(m.test_acc)+'</td><td class="mono" title="'+esc(v.checksum)+'">'+esc(String(v.checksum).slice(0,12))+'…</td><td class="mono">'+fmtDT(v.created_at)+'<div class="muted">'+esc(uname(v.created_by))+'</div></td><td><div class="row">'+acts(v)+'</div></td></tr>';}))
+   :empty('Sin modelos registrados','Cuando un entrenamiento termine, su modelo aparecerá aquí como borrador.'))+'</section>'
+  +(U.mvExp?'<section class="panel"><div class="ph"><h2>Exportación autorizada</h2><div class="row"><button class="btn sm" data-act="copy" data-t="mvtxt">Copiar</button>'+(U.mvExp.csvName?'':'<button class="btn sm" data-act="saveFile" data-n="modelo_v'+U.mvExp.v+'.json" data-t="mvtxt">Descargar</button>')+'<button class="btn sm" data-act="mvClose">Cerrar</button></div></div><pre class="code" id="mvtxt">'+esc(U.mvExp.text.slice(0,60000))+(U.mvExp.text.length>60000?'\n… (el archivo completo se copia o descarga con los botones)':'')+'</pre><textarea id="mvfull" hidden>'+esc(U.mvExp.text)+'</textarea></section>':'');
+  return{h};
+};
+A.mvTo=el=>guard(async()=>{await svc.transitionVersion(el.dataset.id,el.dataset.to);setFlash('Estado del modelo actualizado.');render();});
+A.mvExp=el=>guard(async()=>{const text=await svc.exportVersion(el.dataset.id),v=DB.model_versions.find(x=>x.id===el.dataset.id);U.mvExp={text,v:v.version};render();});
+A.mvClose=()=>{U.mvExp=null;render();};
+
+/* ===== Descargas y copiado ===== */
+let DLC=null;
+async function getDL(){if(DLC!==null)return DLC;try{DLC=(window.claude&&window.claude.use)?await window.claude.use('downloads'):false;}catch(e){DLC=false;}return DLC||false;}
+async function saveText(name,text){
+  const d=await getDL();
+  if(!d&&!window.claude){try{const bl=new Blob([text],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(bl),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);setFlash('Descarga iniciada: '+name+'.');return true;}catch(e){setFlash('No se pudo iniciar la descarga de '+name+'. Usa «Copiar».','warn');return false;}}
+  if(!d){setFlash('La descarga no está disponible en esta vista. Usa «Copiar» y pega el contenido en un archivo.','warn');return false;}
+  try{await d.save({filename:name,data:text});setFlash('Archivo ofrecido para guardar: '+name+'.');return true;}
+  catch(e){if(!e||e.code!=='declined')setFlash('No se pudo guardar '+name+' ('+((e&&e.code)||'error')+'). Usa «Copiar».','warn');return false;}
+}
+const textOf=id=>{const f=g(id+'full')||g(id);return f?(f.value!==undefined&&f.tagName==='TEXTAREA'?f.value:f.textContent):'';};
+A.copy=el=>{
+  const t=textOf(el.dataset.t),b=el,old=b.textContent,ok=m=>{b.textContent=m;setTimeout(()=>{b.textContent=old;},1600);};
+  try{navigator.clipboard.writeText(t).then(()=>ok('Copiado'),()=>{const r=document.createRange(),p=g(el.dataset.t);if(p){r.selectNodeContents(p);const s=getSelection();s.removeAllRanges();s.addRange(r);}ok('Selecciona y copia');});}
+  catch(e){ok('Selecciona y copia');}
+};
+A.saveFile=el=>guard(async()=>{await saveText(el.dataset.n,textOf(el.dataset.t));render();});
+
+/* ===== M09 Reportes ===== */
+function reportData(kind,jobs){
+  const p=U.proj.p,csv=a=>a.map(r=>r.map(csvCell).join(',')).join('\n')+'\n';
+  if(kind==='ficha'){
+    const rows=[['Nombre',p.name],['Descripción',p.description],['Estado',p.status],['Propietario',uname(p.owner_id)],['Miembros',DB.project_members.filter(m=>m.project_id===p.id).map(m=>uname(m.user_id)+' ('+ROLE_ES[m.role]+')').join('; ')],['Etiquetas',p.tags.join(', ')],['Creado',fmtDT(p.created_at)],['Arquitecturas',DB.architectures.filter(x=>x.project_id===p.id).length],['Datasets',DB.datasets.filter(x=>x.project_id===p.id).length],['Entrenamientos',DB.training_jobs.filter(x=>x.project_id===p.id).length],['Modelos aprobados',DB.model_versions.filter(x=>x.project_id===p.id&&x.status==='aprobado').length]];
+    return{html:'<dl class="kv">'+rows.map(r=>'<dt>'+esc(r[0])+'</dt><dd>'+esc(r[1]||'—')+'</dd>').join('')+'</dl>',csv:csv([['campo','valor']].concat(rows)),name:'ficha_proyecto.csv'};
+  }
+  if(kind==='arquitectura'){
+    const as=DB.architectures.filter(x=>x.project_id===p.id).sort((a,b)=>b.created_at-a.created_at),rows=[['arquitectura','version','familia','capa','forma_salida','parametros']];
+    let html='';
+    as.forEach(a=>{const v=validateArch(a.family,a.config_json);v.rows.forEach(r=>rows.push([a.name,a.version,a.family,r.name,r.shape,r.params]));html+='<h3 style="margin:12px 0 6px">'+esc(a.name)+' v'+a.version+' · '+esc(a.family)+' · '+v.params.toLocaleString('es-PE')+' parámetros</h3>'+tbl(['Capa','Forma','#Parámetros'],v.rows.map(r=>'<tr><td>'+esc(r.name)+'</td><td class="mono">'+esc(r.shape)+'</td><td class="n mono">'+r.params+'</td></tr>'));});
+    return{html:html||'<p class="hint">Sin arquitecturas.</p>',csv:csv(rows),name:'resumen_arquitectura.csv'};
+  }
+  const rows=[['entrenamiento','fecha','duracion_s','estado','arquitectura','dataset','optimizador','tasa_aprendizaje','epocas','lote','semilla','exactitud_val','exactitud_prueba']];
+  jobs.forEach(j=>{const P=j.params_json,r=j.result_json;rows.push([j.no,new Date(j.created_at).toISOString(),j.dur!=null?Math.round(j.dur/1000):'',j.status,j.arch,j.dataset,P.optimizer,P.lr,P.epochs,P.batch,P.seed,(j.last_json&&j.last_json.val_acc!=null)?j.last_json.val_acc.toFixed(4):'',r?r.teAcc.toFixed(4):'']);});
+  return{html:jobs.length?tbl(rows[0].map(h=>h.replace(/_/g,' ')),rows.slice(1).map(r=>'<tr>'+r.map(c=>'<td class="mono">'+esc(c)+'</td>').join('')+'</tr>')):'<p class="hint">Sin entrenamientos.</p>',csv:csv(rows),name:'historial_entrenamiento.csv'};
+}
+V.reportes=async()=>{
+  if(!U.pid)return needProject('Reportes');
+  const jobs=await svc.listJobs(U.pid),role=U.proj.role,ok=U.rep!=='historial'||canDo(role,'export'),r=reportData(U.rep,jobs);
+  const tabs=[['ficha','Ficha de proyecto'],['arquitectura','Resumen de arquitectura'],['historial','Historial de entrenamiento']];
+  const h=head('Reportes','Ficha del proyecto, resumen de arquitectura e historial de entrenamiento. La exportación respeta tus permisos.')
+  +'<div class="tabs" role="tablist">'+tabs.map(t=>'<button class="tab" role="tab" aria-selected="'+(U.rep===t[0])+'" data-act="repTab" data-t="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'
+  +'<section class="panel"><div class="ph"><h2>'+esc(tabs.find(t=>t[0]===U.rep)[1])+'</h2><div class="row"><button class="btn sm" data-act="repExp" data-t="copy"'+(ok?'':' disabled')+'>Copiar CSV</button><button class="btn sm" data-act="repExp" data-t="save"'+(ok?'':' disabled')+'>Descargar CSV</button><button class="btn sm" disabled title="El PDF requiere el servicio de reportes de un backend">PDF no disponible</button></div></div>'
+  +(ok?'':'<div class="banner warn">Tu rol no permite exportar el historial.</div>')+r.html+'<textarea id="repcsv" hidden>'+esc(r.csv)+'</textarea></section>';
+  return{h};
+};
+A.repTab=el=>{U.rep=el.dataset.t;render();};
+A.repExp=el=>guard(async()=>{
+  await svc.exportReport(U.pid,U.rep);const txt=textOf('repcsv');
+  if(el.dataset.t==='copy'){try{await navigator.clipboard.writeText(txt);setFlash('CSV copiado al portapapeles.');}catch(e){setFlash('No se pudo copiar automáticamente.','warn');}}
+  else await saveText({ficha:'ficha_proyecto.csv',arquitectura:'resumen_arquitectura.csv',historial:'historial_entrenamiento.csv'}[U.rep],txt);
+  render();
+});
+
+/* ===== M10 Administración y seguridad ===== */
+const ATABS=[['usuarios','Usuarios y roles'],['auditoria','Auditoría'],['sistema','Sistema'],['pruebas','Pruebas']];
+const LIMLAB={maxConcurrent:'Entrenamientos simultáneos',maxEpochs:'Épocas máximas',maxParams:'Parámetros máximos por red',maxLayers:'Capas máximas',maxJobSeconds:'Duración máxima (s)',memoryMB:'Memoria máxima (MB)',cpuPauseMs:'CPU: pausa entre épocas (ms)',maxUploadKB:'Tamaño máximo de CSV (KB)',maxDatasetRows:'Filas máximas por dataset',ratePerMin:'Entrenamientos por minuto y usuario',maxActiveJobsPerProject:'Trabajos activos por proyecto',maxDatasetsPerProject:'Datasets por proyecto',retentionDays:'Retención (días)',quotaKB:'Cuota del almacén de objetos (KB)'};
+V.admin=async()=>{
+  await svc.listUsers();
+  const t=U.adm,tabs='<div class="tabs" role="tablist">'+ATABS.map(x=>'<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" data-act="admTab" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
+  let body='';
+  if(t==='usuarios'){
+    body='<section class="panel"><div class="ph"><h2>Usuarios</h2></div>'+tbl(['Nombre','Usuario','Contraseña','Rol global','Estado'],DB.users.map(u=>'<tr><td>'+esc(u.display_name)+'</td><td class="mono">'+esc(u.username||'—')+'</td><td>'+(u.password_hash?'asignada':'<span style="color:var(--warn)">sin asignar</span>')+'</td><td><select data-bind="urole" data-id="'+esc(u.id)+'" aria-label="Rol de '+esc(u.display_name)+'" style="width:auto"><option value="admin"'+(u.role==='admin'?' selected':'')+'>Administrador</option><option value="user"'+(u.role==='user'?' selected':'')+'>Usuario</option></select></td><td><select data-bind="ustatus" data-id="'+esc(u.id)+'" aria-label="Estado de '+esc(u.display_name)+'" style="width:auto"><option value="activo"'+(u.status==='activo'?' selected':'')+'>Activo</option><option value="suspendido"'+(u.status==='suspendido'?' selected':'')+'>Suspendido</option></select></td></tr>'))+'</section>'
+    +'<div class="g2"><section class="panel"><div class="ph"><h2>Nuevo usuario</h2></div><form data-form="newuser" autocomplete="off"><div class="fields">'
+    +'<label class="f" for="nu-u">Usuario<input id="nu-u" name="username" required maxlength="32" autocomplete="off" autocapitalize="off"></label>'
+    +'<label class="f" for="nu-n">Nombre<input id="nu-n" name="display_name" required maxlength="80"></label>'
+    +'<label class="f" for="nu-e">Correo (opcional)<input id="nu-e" name="email" type="email" maxlength="120"></label>'
+    +'<label class="f" for="nu-r">Rol global<select id="nu-r" name="role"><option value="user">Usuario</option><option value="admin">Administrador</option></select></label>'
+    +'<label class="f" for="nu-p">Contraseña (mín. 8)<input id="nu-p" name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password"></label></div><button class="btn primary" type="submit">Crear usuario</button></form></section>'
+    +'<section class="panel"><div class="ph"><h2>Asignar contraseña</h2></div><form data-form="setpw" autocomplete="off"><div class="fields">'
+    +'<label class="f" for="sp-u">Usuario<select id="sp-u" name="id">'+DB.users.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.username||x.display_name)+'</option>').join('')+'</select></label>'
+    +'<label class="f" for="sp-p">Nueva contraseña (mín. 8)<input id="sp-p" name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password"></label></div><button class="btn primary" type="submit">Asignar</button></form></section></div>'
+    +'<section class="panel"><div class="ph"><h2>Permisos por rol de proyecto</h2></div>'+tbl(['Capacidad','Lector','Editor','Propietario','Admin.'],[['Ver proyecto, métricas y modelos','viewer'],['Crear arquitecturas y datasets','editor'],['Iniciar y cancelar entrenamientos','editor'],['Revisar y exportar modelos','editor'],['Aprobar y retirar modelos','owner'],['Gestionar miembros y proyecto','owner']].map(r=>'<tr><td>'+r[0]+'</td>'+['viewer','editor','owner','admin'].map(x=>'<td>'+(LVL[x]>=LVL[r[1]]?'✓':'—')+'</td>').join('')+'</tr>').concat(['<tr><td>Usuarios, límites, auditoría y datos CSV</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>']))+'</section>';
+  }else if(t==='auditoria'){
+    const q=(U.aq||'').toLowerCase(),act=U.aa||'',acts=Array.from(new Set(DB.audit_events.map(e=>e.action))).sort();
+    const ev=DB.audit_events.filter(e=>(!act||e.action===act)&&(!q||(e.action+' '+uname(e.actor_id)+' '+JSON.stringify(e.metadata_json)).toLowerCase().includes(q))).slice(0,300);
+    body='<section class="panel"><div class="ph"><h2>Auditoría</h2><span class="muted" style="font-size:12px">'+DB.audit_events.length+' eventos</span></div><div class="fields"><label class="f" for="aq">Buscar<input type="search" id="aq" data-bind="aq" value="'+esc(U.aq||'')+'"></label><label class="f" for="aa">Acción<select id="aa" data-bind="aa"><option value="">Todas</option>'+acts.map(a=>'<option'+(a===act?' selected':'')+'>'+esc(a)+'</option>').join('')+'</select></label></div>'
+    +tbl(['Fecha','Actor','Acción','Proyecto','Detalle'],ev.map(e=>{const p=DB.projects.find(x=>x.id===e.project_id);return '<tr><td class="mono">'+fmtDT(e.created_at)+'</td><td>'+esc(uname(e.actor_id))+'</td><td class="mono">'+esc(e.action)+'</td><td>'+esc(p?p.name:'—')+'</td><td class="mono" style="font-size:11px">'+esc(JSON.stringify(e.metadata_json).slice(0,110))+'</td></tr>';}))+'</section>';
+  }else if(t==='sistema'){
+    let be='—',tv='no cargado';if(typeof window.tf!=='undefined'){tv='v'+((window.tf.version&&window.tf.version.tfjs)||'?');try{be=window.tf.getBackend();}catch(e){}}
+    body='<div class="g2"><section class="panel"><div class="ph"><h2>Salud del sistema</h2></div>'+tbl(['Componente','Estado'],[['Almacén de tablas CSV','En memoria · '+usageKB()+' / '+S().quotaKB+' KB de objetos'],['Persistencia local','Copia en el navegador; la copia durable son los CSV'],['TensorFlow.js',tv+' · backend '+be],['Visor 3D',window.THREE?'Three.js r'+window.THREE.REVISION:'no cargado'],['Worker de entrenamiento','Hilo principal · '+DB.training_jobs.filter(j=>j.status==='RUNNING'||j.status==='PREPARING').length+' activo(s) · cola '+DB.training_jobs.filter(j=>j.status==='QUEUED').length],['Canal de eventos',bus.rt?'Pub/sub en memoria conectado':'Desconectado (simulado)'],['Secretos','Ninguno en el cliente · los registros omiten datos sensibles']].map(r=>'<tr><td>'+r[0]+'</td><td>'+esc(r[1])+'</td></tr>'))+'</section>'
+    +'<section class="panel"><div class="ph"><h2>Retención</h2></div><p class="hint">Elimina eventos de auditoría y métricas con más de '+S().retentionDays+' días.</p><button class="btn" data-act="retention">Aplicar retención ahora</button></section></div>'
+    +'<section class="panel"><div class="ph"><h2>Consola de la API</h2><span class="muted" style="font-size:12px">últimas '+API_LOG.length+' llamadas · sin cuerpos ni datos sensibles</span></div>'+tbl(['Hora','Método','Ruta','#Estado','#ms','Usuario'],API_LOG.slice(0,40).map(l=>'<tr><td class="mono">'+new Date(l.t).toLocaleTimeString('es-PE',{hour12:false})+'</td><td class="mono">'+l.method+'</td><td class="mono" style="font-size:11px">'+esc(l.path)+'</td><td class="n mono" style="color:var(--'+(l.st<400?'ok':'bad')+')">'+l.st+'</td><td class="n mono">'+l.ms+'</td><td>'+esc(uname(l.u))+'</td></tr>'))+'</section>';
+  }else{
+    const busy=DB.training_jobs.some(isActive);
+    body='<section class="panel"><div class="ph"><h2>Pruebas automáticas</h2><button class="btn primary" data-act="runTests"'+(busy?' disabled':'')+'>Ejecutar pruebas</button></div><p class="hint">Unitarias (validación de arquitecturas, estados, permisos, CSV) e integración del servicio con las tablas, sobre una copia de los datos de ejemplo: no tocan tus datos.'+(busy?' Espera a que termine el entrenamiento activo.':'')+'</p>'
+    +(U.tests?tbl(['Resultado','Prueba','Detalle'],U.tests.map(r=>'<tr><td><span class="pill '+(r.ok?'COMPLETED':'FAILED')+'">'+(r.ok?'Pasa':'Falla')+'</span></td><td>'+esc(r.name)+'</td><td class="muted">'+esc(r.msg||'')+'</td></tr>'))+'<p class="hint" style="margin-top:8px">'+U.tests.filter(r=>r.ok).length+' de '+U.tests.length+' pruebas pasan.</p>':'')+'</section>';
+  }
+  return{h:head('Administración y seguridad','Usuarios y roles, auditoría, estado del sistema y pruebas. Los CSV y los límites están en Configuración.')+tabs+body};
+};
+/* ===== Configuración (importar/exportar CSV, límites, cuenta) ===== */
+const CTABS=[['importar','Importar CSV',true],['exportar','Exportar CSV',true],['limites','Límites',true],['cuenta','Mi cuenta',false]];
+V.config=async()=>{
+  const u=me(),adm=u.role==='admin',tabs0=CTABS.filter(x=>adm||!x[2]);
+  let t=U.cfg;if(!tabs0.some(x=>x[0]===t))t=U.cfg=tabs0[0][0];
+  const tabs='<div class="tabs" role="tablist">'+tabs0.map(x=>'<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" data-act="cfgTab" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>';
+  let body='';
+  if(t==='importar'){
+    body='<section class="panel"><div class="ph"><h2>Cargar tablas</h2></div><p class="hint">Primero ingresa con tu usuario; aquí cargas tus archivos CSV (users.csv, projects.csv, …, o un conjunto de ellos). Reemplaza las tablas cuyos archivos selecciones. Se valida el encabezado de cada una y la integridad entre ellas.</p><div class="row"><input type="file" id="csvImport" accept=".csv,text/csv" multiple style="max-width:380px" aria-label="Archivos CSV de tablas"><button class="btn primary" data-act="importCsv2">Cargar tablas</button></div>'+(U.imp?'<div class="banner '+U.imp.k+'" style="margin-top:12px">'+esc(U.imp.m)+(U.imp.d&&U.imp.d.length?'<ul>'+U.imp.d.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'')+'</div>':'')+'</section>'
+    +'<section class="panel"><div class="ph"><h2>Datos de ejemplo</h2></div><p class="hint">Restablece las tablas a los datos iniciales (3 usuarios, 2 proyectos). Se pierde lo que no hayas exportado.</p>'+(U.confirm==='reset'?'<button class="btn danger" data-act="resetData">Confirmar restablecimiento</button>':'<button class="btn" data-act="resetData">Restablecer</button>')+'</section>';
+  }else if(t==='exportar'){
+    body='<section class="panel"><div class="ph"><h2>Tablas CSV</h2><div class="row"><button class="btn primary" data-act="exportAll">Descargar todas</button></div></div><p class="hint">No hay base de datos: cada entidad es un archivo CSV. Los datos viven en este navegador hasta que los descargues; vuelve a cargarlos en la pestaña «Importar CSV».'+(isDirty()?' <b style="color:var(--warn)">Hay cambios sin exportar.</b>':'')+'</p>'
+    +tbl(['Archivo','#Filas','#Tamaño (KB)','Contenido',''],Object.keys(TABLES).map(n=>'<tr><td class="mono">'+n+'.csv</td><td class="n">'+tableCount(n)+'</td><td class="n">'+(tableToCSV(n).length/1024).toFixed(1)+'</td><td class="muted">'+esc(TABLES[n].join(', ').slice(0,70))+'…</td><td><div class="row"><button class="btn sm" data-act="tblSave" data-n="'+n+'">Descargar</button><button class="btn sm" data-act="tblCopy" data-n="'+n+'">Copiar</button></div></td></tr>'))+'</section>'
+    +(U.tblTxt?'<section class="panel"><div class="ph"><h2>'+esc(U.tblTxt.n)+'.csv</h2><button class="btn sm" data-act="copy" data-t="tbltxt">Copiar</button></div><textarea id="tbltxt" readonly style="min-height:160px;font-family:var(--f-mono);font-size:12px">'+esc(U.tblTxt.text)+'</textarea></section>':'');
+  }else if(t==='limites'){
+    body='<section class="panel"><div class="ph"><h2>Límites de recursos</h2></div><form data-form="settings"><div class="fields">'+Object.keys(LIMLAB).map(k=>'<label class="f" for="st-'+k+'">'+LIMLAB[k]+'<input type="number" id="st-'+k+'" name="'+k+'" value="'+S()[k]+'" min="'+LIMITS[k][0]+'" max="'+LIMITS[k][1]+'"></label>').join('')+'<label class="f" for="st-backend">GPU / CPU<select id="st-backend" name="backend"><option value="cpu"'+(S().backend==='cpu'?' selected':'')+'>CPU (por defecto)</option><option value="webgl"'+(S().backend==='webgl'?' selected':'')+'>GPU (WebGL)</option></select></label></div><button class="btn primary" type="submit">Guardar límites</button></form></section>';
+  }else{
+    body='<section class="panel"><div class="ph"><h2>Mi cuenta</h2></div>'+tbl(['Dato','Valor'],[['Usuario','<span class="mono">'+esc(u.username||'—')+'</span>'],['Nombre',esc(u.display_name)],['Correo',esc(u.email)],['Rol global',u.role==='admin'?'Administrador':'Usuario']].map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'))+'</section>'
+    +'<section class="panel"><div class="ph"><h2>Cambiar contraseña</h2></div><form data-form="chpw" autocomplete="off"><div class="fields">'
+    +'<label class="f" for="pw-o">Contraseña actual<input type="password" id="pw-o" name="old" autocomplete="current-password" required maxlength="128"></label>'
+    +'<label class="f" for="pw-n">Nueva contraseña (mín. 8)<input type="password" id="pw-n" name="nw" autocomplete="new-password" required minlength="8" maxlength="128"></label>'
+    +'<label class="f" for="pw-r">Repite la nueva<input type="password" id="pw-r" name="rp" autocomplete="new-password" required minlength="8" maxlength="128"></label></div>'
+    +'<button class="btn primary" type="submit">Cambiar contraseña</button></form><p class="hint" style="margin-top:8px">La contraseña se guarda solo como hash PBKDF2 con sal en users.csv; nunca en texto claro.</p></section>';
+  }
+  return{h:head('Configuración','Importa y exporta las tablas CSV, ajusta los límites de recursos y administra tu cuenta.')+tabs+body};
+};
+A.cfgTab=el=>{U.cfg=el.dataset.t;U.tblTxt=null;render();};
+F.chpw=f=>guard(async()=>{
+  if(f.nw.value!==f.rp.value)throw E(422,'La nueva contraseña y su repetición no coinciden.');
+  await svc.changePassword(f.old.value,f.nw.value);setFlash('Contraseña cambiada. Si exportas users.csv, llevará la nueva.');render();
+});
+F.newuser=f=>guard(async()=>{await svc.createUser({username:f.username.value,display_name:f.display_name.value,email:f.email.value,role:f.role.value,password:f.password.value});setFlash('Usuario creado.');render();});
+F.setpw=f=>guard(async()=>{await svc.resetPassword(f.id.value,f.password.value);setFlash('Contraseña asignada.');render();});
+A.admTab=el=>{U.adm=el.dataset.t;U.tblTxt=null;render();};
+A.tblSave=el=>guard(async()=>{await saveText(el.dataset.n+'.csv',tableToCSV(el.dataset.n));render();});
+A.tblCopy=el=>{U.tblTxt={n:el.dataset.n,text:tableToCSV(el.dataset.n)};render();};
+A.exportAll=()=>guard(async()=>{
+  let n=0;for(const t of Object.keys(TABLES)){if(await saveText(t+'.csv',tableToCSV(t)))n++;else break;}
+  if(n===Object.keys(TABLES).length){DB._exported=DB._rev;try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){}setFlash('Se ofrecieron las '+n+' tablas para guardar.');}
+  render();
+});
+A.importCsv2=A.importCsv;
+A.resetData=()=>guard(async()=>{if(U.confirm!=='reset'){U.confirm='reset';render();return;}U.confirm=null;DB=seed();Object.keys(ROWC).forEach(k=>delete ROWC[k]);SES=null;persist();setFlash('Datos restablecidos. Vuelve a ingresar.');render();});
+A.retention=()=>guard(async()=>{const r=await svc.applyRetention();setFlash('Retención aplicada: '+r.auditoria+' eventos y '+r.metricas+' métricas eliminados.');render();});
+F.settings=f=>guard(async()=>{const o={};Object.keys(LIMLAB).forEach(k=>{o[k]=f[k].value;});o.backend=f.backend.value;await svc.saveSettings(o);setFlash('Límites guardados.');render();});
+B.urole=el=>guard(async()=>{await svc.setUser(el.dataset.id,{role:el.value});setFlash('Rol actualizado.');render();});
+B.ustatus=el=>guard(async()=>{await svc.setUser(el.dataset.id,{status:el.value});setFlash('Estado actualizado.');render();});
+B.aq=el=>{U.aq=el.value;clearTimeout(qt_);qt_=setTimeout(()=>{render().then(()=>{const i=g('aq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}});},250);};
+B.aa=el=>{U.aa=el.value;render();};
+
+/* ===== Pruebas automáticas ===== */
+async function sandbox(user,fn){
+  const sv={DB,SES,NL:NOLOG,NP:NOPERSIST,NS:NOSCHED,RT:bus.rt};
+  DB=seed();SES=user;NOLOG=true;NOPERSIST=true;NOSCHED=true;bus.rt=false;
+  try{await fn();}finally{DB=sv.DB;SES=sv.SES;NOLOG=sv.NL;NOPERSIST=sv.NP;NOSCHED=sv.NS;bus.rt=sv.RT;}
+}
+const ok_=(c,m)=>{if(!c)throw new Error(m||'La condición no se cumple.');};
+async function status(p,code){try{await p;}catch(e){if(e.status===code)return;throw new Error('esperaba '+code+' y fue '+(e.status||e.message));}throw new Error('esperaba el error '+code+' y no hubo error');}
+const JOBF=(extra)=>Object.assign({architecture_id:'a1',dataset_id:'d1',epochs:5,batch:32,optimizer:'adam',lr:0.01,seed:1},extra||{});
+const TESTS=[
+  ['Validación: Dense tras Conv2D sin Flatten se rechaza',async()=>{const v=validateArch('CNN',{input:[16,16,1],layers:[{type:'conv2d',filters:4,kernel:3,act:'relu'},{type:'dense',units:8,act:'relu'}],out:2});ok_(!v.ok&&v.errors.some(e=>/Flatten/.test(e)));}],
+  ['Validación: MLP 2-16-8-1 suma 193 parámetros',async()=>{const v=validateArch('Feedforward',{input:[2],layers:[{type:'dense',units:16,act:'relu'},{type:'dense',units:8,act:'relu'}],out:1});ok_(v.ok&&v.params===193,'parámetros: '+v.params);}],
+  ['Validación: kernel mayor que la imagen se rechaza',async()=>{const v=validateArch('CNN',{input:[4,4,1],layers:[{type:'conv2d',filters:2,kernel:7,act:'relu'}],out:2});ok_(!v.ok);}],
+  ['Validación: recurrente después de densa se rechaza',async()=>{const v=validateArch('RNN',{input:[10,3],layers:[{type:'dense',units:4,act:'relu'},{type:'lstm',units:8}],out:2});ok_(!v.ok);}],
+  ['Validación: GAN con generador y discriminador es válida',async()=>{const v=validateArch('GAN',defaultCfg('GAN'));ok_(v.ok&&v.params>0);}],
+  ['Estados: solo transiciones permitidas',async()=>{ok_(canTransition('QUEUED','PREPARING')&&!canTransition('QUEUED','COMPLETED')&&!canTransition('COMPLETED','RUNNING')&&canTransition('RUNNING','CANCELLED'));}],
+  ['Permisos: lector no escribe, editor no aprueba, propietario sí',async()=>{ok_(!canDo('viewer','write')&&canDo('editor','write')&&!canDo('editor','approve')&&canDo('owner','approve'));}],
+  ['Archivos: CSV binario o no numérico se rechaza; uno válido se acepta',async()=>{const bad=validateCSV('a,b\n1,\u0000\n',{fileName:'x.csv',size:10,mime:'text/csv'},DEFAULTS),txt=validateCSV('a,b\nx,y\n'.repeat(12),{fileName:'x.csv',size:30,mime:'text/csv'},DEFAULTS),d=genData('xor',60,0.1,1),good=validateCSV('x1,x2,clase\n'+d.X.map((r,i)=>r.join(',')+','+d.y[i]).join('\n'),{fileName:'ok.csv',size:900,mime:'text/csv'},DEFAULTS);ok_(!bad.ok&&!txt.ok&&good.ok);}],
+  ['Seguridad: un lector no puede iniciar entrenamientos (403)',async()=>sandbox('u3',async()=>{await status(svc.createJob('p1',JOBF()),403);})],
+  ['Seguridad: acceso horizontal a un proyecto ajeno (403) y queda auditado',async()=>sandbox('u2',async()=>{await status(svc.getProject('p2'),403);ok_(DB.audit_events.some(e=>e.action==='acceso_denegado'));})],
+  ['Reglas: forma de salida incompatible con el dataset (422)',async()=>sandbox('u2',async()=>{const r=await svc.createArch('p1',{name:'Salida 5',family:'Feedforward',config:{input:[2],layers:[],out:5}});await status(svc.createJob('p1',JOBF({architecture_id:r.id})),422);})],
+  ['Límites: épocas por encima del máximo (422)',async()=>sandbox('u2',async()=>{await status(svc.createJob('p1',JOBF({epochs:99999})),422);})],
+  ['Límites: la 7.ª solicitud por minuto se rechaza (429)',async()=>sandbox('u2',async()=>{DB.settings.maxActiveJobsPerProject=50;for(let i=0;i<6;i++)await svc.createJob('p1',JOBF());await status(svc.createJob('p1',JOBF()),429);})],
+  ['Trazabilidad: un dataset usado por un trabajo no se elimina (409)',async()=>sandbox('u2',async()=>{await svc.createJob('p1',JOBF());await status(svc.deleteDataset('p1','d1'),409);})],
+  ['Cancelación: se audita y el worker confirma el estado final',async()=>sandbox('u2',async()=>{const id=await svc.createJob('p1',JOBF());await svc.cancelJob(id);const j=DB.training_jobs.find(x=>x.id===id);ok_(j.cancel_requested&&DB.audit_events.some(e=>e.action==='entrenamiento_cancelacion_solicitada'),'no quedó solicitada o auditada');confirmQueuedCancels();ok_(j.status==='CANCELLED'&&j.state_reason.length>0,'el worker no confirmó el estado');})],
+  ['Modelos: borrador→aprobado es inválido; el flujo borrador→revisado→aprobado funciona',async()=>sandbox('u2',async()=>{DB.model_versions.push({id:'mv1',project_id:'p1',job_id:'j1',version:1,storage_key:'k',status:'borrador',checksum:'x',created_at:1,created_by:'u2',meta_json:{}});await status(svc.transitionVersion('mv1','aprobado'),409);await svc.transitionVersion('mv1','revisado');await svc.transitionVersion('mv1','aprobado');ok_(DB.model_versions[0].status==='aprobado');})],
+  ['Almacén: todas las tablas sobreviven a CSV ida y vuelta',async()=>sandbox('u1',async()=>{const canon=a=>JSON.stringify(a.map(o=>Object.keys(o).sort().reduce((r,k)=>(r[k]=o[k],r),{})));Object.keys(TABLES).filter(t=>t!=='settings'&&t!=='objects').forEach(t=>{ok_(canon(tableFromCSV(t,tableToCSV(t)))===canon(DB[t]),'falla '+t);});})],
+  ['Importación: cargar los CSV exportados reproduce los datos',async()=>sandbox('u1',async()=>{const files=Object.keys(TABLES).map(t=>({name:t+'.csv',text:tableToCSV(t)}));DB.projects.length=0;const r=await svc.importCSV(files);ok_(DB.projects.length===2&&r.loaded.length===Object.keys(TABLES).length);})],
+  ['Acceso: ingreso válido, contraseña incorrecta (401) y usuario inexistente (401)',async()=>sandbox(null,async()=>{
+    const u=await svc.login('joaquinoh20','animacion123');ok_(u.id==='u1'&&SES==='u1','no inició sesión');
+    SES=null;await status(svc.login('joaquinoh20','incorrecta1'),401);await status(svc.login('noexiste','animacion123'),401);
+    await status(svc.login('luis.ramos','animacion123'),401);ok_(SES===null,'no debía haber sesión');
+    FAILS.joaquinoh20=null;delete FAILS.joaquinoh20;
+  })],
+  ['Acceso: 5 intentos fallidos bloquean 60 s (429) y se audita',async()=>sandbox(null,async()=>{
+    delete FAILS['zz-bloqueo'];for(let i=0;i<5;i++)await status(svc.login('zz-bloqueo','mala-clave-'+i),401);
+    await status(svc.login('zz-bloqueo','otra-clave-1'),429);delete FAILS['zz-bloqueo'];
+    ok_(DB.audit_events.filter(e=>e.action==='inicio_sesion_fallido').length>=5,'faltan eventos de auditoría');
+  })],
+  ['Credenciales: users.csv guarda hash con sal, nunca la contraseña en claro',async()=>sandbox('u1',async()=>{
+    const csv=tableToCSV('users');ok_(!csv.includes('animacion123'),'contraseña en claro');ok_(/[0-9a-f]{64}/.test(csv),'no hay hash');
+    await svc.changePassword('animacion123','NuevaClave99');await status(svc.changePassword('animacion123','OtraClave88'),401);
+    await status(svc.changePassword('NuevaClave99','corta'),422);SES=null;await svc.login('joaquinoh20','NuevaClave99');
+    delete FAILS.joaquinoh20;
+  })],
+  ['Usuarios: solo el administrador crea usuarios y asigna contraseñas',async()=>sandbox('u2',async()=>{
+    await status(svc.createUser({username:'nuevo.uno',display_name:'Nuevo',role:'user',password:'ClaveSegura1'}),403);
+    SES='u1';await svc.createUser({username:'nuevo.uno',display_name:'Nuevo',role:'user',password:'ClaveSegura1'});
+    await status(svc.createUser({username:'NUEVO.uno',display_name:'Otro',role:'user',password:'ClaveSegura1'}),409);
+    await status(svc.createUser({username:'x',display_name:'Otro',role:'user',password:'ClaveSegura1'}),422);
+    SES=null;await svc.login('nuevo.uno','ClaveSegura1');delete FAILS['nuevo.uno'];
+  })],
+  ['Importación: users.csv sin administrador con credenciales se rechaza (422)',async()=>sandbox('u1',async()=>{
+    const rows=DB.users.map(u=>Object.assign({},u,{password_hash:'',salt:''}));const sv=DB.users;DB.users=rows;const text=tableToCSV('users');DB.users=sv;
+    await status(svc.importCSV([{name:'users.csv',text}]),422);
+  })],
+];
+A.runTests=()=>guard(async()=>{
+  const res=[];
+  for(const [name,fn] of TESTS){try{await fn();res.push({name,ok:true});}catch(e){res.push({name,ok:false,msg:e.message});}}
+  U.tests=res;audit('pruebas_ejecutadas',null,{pasan:res.filter(r=>r.ok).length,total:res.length});persist();render();
+});
+
+/* ===== Arranque ===== */
+let lt=0;const live=()=>{if(lt)return;lt=setTimeout(()=>{lt=0;if(LIVE&&SES)LIVE();},250);};
+function boot(){
+  let loaded=null;try{const r=localStorage.getItem(LSK);if(r)loaded=JSON.parse(r);}catch(e){}
+  DB=loaded&&loaded.projects&&loaded.users?loaded:seed();
+  DB.settings=Object.assign({},DEFAULTS,DB.settings);if(!DB.objects)DB.objects={};
+  try{SES=sessionStorage.getItem(LSS)||null;}catch(e){}
+  if(SES&&!DB.users.find(u=>u.id===SES&&u.status==='activo'))SES=null;
+  recoverJobs();
+  bus.ls.push(()=>live());
+  const h=(location.hash||'').slice(1);if(MODS.some(m=>m[1]===h))U.view=h;
+  document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const fn=A[el.dataset.act];if(fn){e.preventDefault();fn(el,e);}});
+  document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();const fn=F[f.dataset.form];if(fn)fn(f);});
+  document.addEventListener('input',e=>{const el=e.target.closest('[data-bind]');if(!el||el.tagName==='SELECT'||el.type==='checkbox'||el.type==='file')return;const fn=B[el.dataset.bind];if(fn)fn(el,'input');});
+  document.addEventListener('change',e=>{const el=e.target.closest('[data-bind]');if(!el)return;const fn=B[el.dataset.bind];if(fn)fn(el,'change');});
+  window.addEventListener('hashchange',()=>{const v=location.hash.slice(1);if(SES&&MODS.some(m=>m[1]===v)&&v!==U.view){U.view=v;if(v==='proyectos')U.open=false;render();}});
+  let rz=0,lw=window.innerWidth;window.addEventListener('resize',()=>{if(window.innerWidth===lw)return;lw=window.innerWidth;clearTimeout(rz);rz=setTimeout(()=>{if(SES)render();},250);});
+  new MutationObserver(()=>{if(SES)render();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(SES)render();});}catch(e){}
+  render();schedule();
+}
+boot();
+})();
+</script>
+</body></html>
